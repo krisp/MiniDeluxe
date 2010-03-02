@@ -2,15 +2,28 @@
 using System.Collections.Generic;
 using System.Text;
 using System.IO.Ports;
+using System.Timers;
 
 namespace MiniDeluxe
 {
     class MiniDeluxe
     {
+        Timer t;
+        CATConnector c;
+
         public MiniDeluxe()
         {
-            CATConnector c = new CATConnector(new SerialPort("COM21"));
+            c = new CATConnector(new SerialPort("COM21"));
             c.CATEvent += new CATEventHandler(c_CATEvent);
+
+            t = new Timer(1000);
+            t.Elapsed += new ElapsedEventHandler(t_Elapsed);
+            t.Start();
+        }
+
+        void t_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            c.WriteCommand("ZZIF;");
         }
 
         void c_CATEvent(object sender, CATEventArgs e)

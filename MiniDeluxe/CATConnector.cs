@@ -41,6 +41,15 @@ namespace MiniDeluxe
             }
         }
 
+        public void WriteCommand(String command)
+        {
+            try
+            {
+                port.Write(command);
+            }
+            catch { }
+        }
+
         private void ProcessData()
         {
             if (buffer.ToString().EndsWith(";"))
@@ -52,16 +61,29 @@ namespace MiniDeluxe
 
         private void ParseCommand(String command)
         {
-            if (command.StartsWith("ZZ"))
+            // "extended" PowerSDR command            
+            Match m = Regex.Match(command, "(ZZ[A-Z][A-Z])(.*);");
+            if (m.Success)
             {
-                Match m = Regex.Match(command, "(ZZ[A-Z][A-Z])(.*);");
-                if (m.Success)
-                {
-                    CATEventArgs cea = new CATEventArgs(m.Groups[1].ToString(), m.Groups[2].ToString());
-                    if (CATEvent != null)
-                        CATEvent(this, cea);
-                }
+                CATEventArgs cea = new CATEventArgs(m.Groups[1].ToString(), m.Groups[2].ToString());
+                if (CATEvent != null)
+                    CATEvent(this, cea);
+                
+                return;
             }
+            
+            // Kenwood-compatible command
+            m = Regex.Match(command, "([A-Z][A-Z])(.*);");
+            if (m.Success)
+            {
+                CATEventArgs cea = new CATEventArgs(m.Groups[1].ToString(), m.Groups[2].ToString());
+                if (CATEvent != null)
+                    CATEvent(this, cea);
+
+                return;
+            }
+
+            throw new Exception("Invalid CAT data processed.");
         }
 
         public void Close()
@@ -70,10 +92,8 @@ namespace MiniDeluxe
             port.Close();
         }
     }
-
    
     public delegate void CATEventHandler(object sender, CATEventArgs e);
-
     public class CATEventArgs : EventArgs
     {
         private String _command;

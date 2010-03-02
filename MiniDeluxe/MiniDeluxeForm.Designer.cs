@@ -1,6 +1,6 @@
 ﻿namespace MiniDeluxe
 {
-    partial class Form1
+    partial class MiniDeluxeForm
     {
         /// <summary>
         /// Required designer variable.

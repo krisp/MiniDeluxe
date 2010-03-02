@@ -7,5 +7,9 @@ namespace MiniDeluxe
 {
     class MiniDeluxe
     {
+        public MiniDeluxe()
+        {
+
+        }    
     }
 }

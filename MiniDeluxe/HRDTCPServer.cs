@@ -11,6 +11,8 @@ namespace MiniDeluxe
 {
     class HRDTCPServer
     {
+        public event HRDTCPEventHandler HRDTCPEvent;
+
         private bool stopListening = false;
         private bool stopClients = false;
 
@@ -50,43 +52,16 @@ namespace MiniDeluxe
                 if (msg.nSize == 0)
                     break;
 
-                String s = new String(Encoding.Unicode.GetChars(msg.szText)).ToUpper();                                               
-
-                if (s.Contains("GET ID"))
-                {                                       
-                    bw.Write(HRDMessage.HRDMessageToByteArray("MiniDeluxe"));
-                }
-                else if(s.Contains("GET VERSION"))
-                {
-                    bw.Write(HRDMessage.HRDMessageToByteArray("v0.1"));
-                }
-                else if(s.Contains("GET FREQUENCY"))
-                {
-                    bw.Write(HRDMessage.HRDMessageToByteArray("144450000"));
-                }
-                else if (s.Contains("GET RADIO"))
-                {
-                    bw.Write(HRDMessage.HRDMessageToByteArray("PowerSDR"));
-                }
-                else if (s.Contains("GET CONTEXT"))
-                {
-                    bw.Write(HRDMessage.HRDMessageToByteArray("1"));
-                }
-                else if (s.Contains("GET FREQUENCIES"))
-                {
-                    bw.Write(HRDMessage.HRDMessageToByteArray("144450000-433000000"));
-                }
-                else
-                {
-                    bw.Write(HRDMessage.HRDMessageToByteArray(""));
-                }
+                HRDTCPEventArgs e = new HRDTCPEventArgs(client, msg);
+                if (HRDTCPEvent != null)
+                    HRDTCPEvent(this, e);
             }            
             
             clients.Remove(client);
         }
     }
     
-    struct HRDMessageBlock
+    public struct HRDMessageBlock
     {
         public uint nSize;
         public uint nSanity1;
@@ -95,7 +70,7 @@ namespace MiniDeluxe
         public byte[] szText;
     }
     
-    static class HRDMessage
+    public static class HRDMessage
     {        
         public static byte[] HRDMessageToByteArray(String szText)
         {            
@@ -136,6 +111,27 @@ namespace MiniDeluxe
                 msg.nSize = 0;
                 return msg;
             }
+        }
+    }
+
+    public delegate void HRDTCPEventHandler(object sender, HRDTCPEventArgs e);
+    public class HRDTCPEventArgs : EventArgs
+    {
+        private TcpClient _client;
+        private HRDMessageBlock _msg;
+
+        public TcpClient Client { get { return _client; } }
+        public HRDMessageBlock Message { get { return _msg; } }
+
+        public HRDTCPEventArgs(TcpClient client, HRDMessageBlock msg)
+        {
+            this._client = client;
+            this._msg = msg;
+        }
+
+        public override String ToString()
+        {
+            return new String(Encoding.Unicode.GetChars(_msg.szText));
         }
     }
 }

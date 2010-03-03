@@ -60,30 +60,15 @@ namespace MiniDeluxe
         }
 
         private void ParseCommand(String command)
-        {
-            // "extended" PowerSDR command            
-            Match m = Regex.Match(command, "(ZZ[A-Z][A-Z])(.*);");
+        {           
+            Match m = Regex.Match(command, "([A-Z]{2,4})(.*);");
             if (m.Success)
             {
                 CATEventArgs cea = new CATEventArgs(m.Groups[1].ToString(), m.Groups[2].ToString());
                 if (CATEvent != null)
-                    CATEvent(this, cea);
-                
+                    CATEvent(this, cea);               
                 return;
             }
-            
-            // Kenwood-compatible command
-            m = Regex.Match(command, "([A-Z][A-Z])(.*);");
-            if (m.Success)
-            {
-                CATEventArgs cea = new CATEventArgs(m.Groups[1].ToString(), m.Groups[2].ToString());
-                if (CATEvent != null)
-                    CATEvent(this, cea);
-
-                return;
-            }
-
-            throw new Exception("Invalid CAT data processed.");
         }
 
         public void Close()

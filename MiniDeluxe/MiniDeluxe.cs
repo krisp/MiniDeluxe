@@ -10,6 +10,7 @@ namespace MiniDeluxe
     class MiniDeluxe
     {
         private const String Serialport = "COM20";
+        private const double Updatetime = 1000;
         readonly Timer _timer;
         readonly CATConnector _cat;
         readonly HRDTCPServer _server;
@@ -19,9 +20,11 @@ namespace MiniDeluxe
         {
             private string _mode;
             private string _band;
+            private string _displayMode;
 
             public string vfoa;
             public string vfob;
+            public string rawmode;
             public bool mox;
 
             public string Mode
@@ -29,6 +32,7 @@ namespace MiniDeluxe
                 get { return _mode; }
                 set
                 {
+                    rawmode = value;
                     switch (value)
                     {
                         case "00":
@@ -128,24 +132,62 @@ namespace MiniDeluxe
                     }
                 }
             }
+            public string DisplayMode
+            {
+                get { return _displayMode; }
+                set
+                {
+                    switch(value)
+                    {
+                        case "0":
+                            _displayMode = "Spectrum";
+                            break;
+                        case "1":
+                            _displayMode = "Panadapter";
+                            break;
+                        case "2":
+                            _displayMode = "Scope";
+                            break;
+                        case "3":
+                            _displayMode = "Phase";
+                            break;
+                        case "4":
+                            _displayMode = "Phase2";
+                            break;
+                        case "5":
+                            _displayMode = "Waterfall";
+                            break;
+                        case "6":
+                            _displayMode = "Histogram";
+                            break;
+                        case "7":
+                            _displayMode = "Off";
+                            break;
+                    }
+                }
+            }
         }
 
         public MiniDeluxe()
         {
-            _data = new RadioData {vfoa = "0", vfob = "0", Mode = "", mox = false};
+            _data = new RadioData {vfoa = "0", vfob = "0", Mode = "00", mox = false, DisplayMode = "0"};
             _cat = new CATConnector(new SerialPort(Serialport));
-            _cat.CATEvent += CatcatEvent;
+            _timer = new Timer(Updatetime);
+            _server = new HRDTCPServer();
 
+            // event handlers
+            _cat.CATEvent += CatcatEvent;
+            _timer.Elapsed += TimerElapsed;
+            _server.HRDTCPEvent += ServerHRDTCPEvent;
+
+            // write initial commands to the radio to fill in initial data
             _cat.WriteCommand("ZZIF;");
             _cat.WriteCommand("ZZFB;");
             _cat.WriteCommand("ZZBS;");
-
-            _timer = new Timer(1000);
-            _timer.Elapsed += TimerElapsed;
+            _cat.WriteCommand("ZZDM;");
+            
             _timer.Start();
-
-            _server = new HRDTCPServer();
-            _server.HRDTCPEvent += ServerHRDTCPEvent;
+            _server.Start();            
         }
 
         void ServerHRDTCPEvent(object sender, HRDTCPEventArgs e)
@@ -196,30 +238,52 @@ namespace MiniDeluxe
             _cat.WriteCommand("ZZIF;");
             _cat.WriteCommand("ZZFB;");
             _cat.WriteCommand("ZZBS;");
+            _cat.WriteCommand("ZZDM;");
         }
 
         void CatcatEvent(object sender, CATEventArgs e)
         {
             switch(e.Command)
             {
+                // vfoa, mode, xmit status
                 case "ZZIF":                
                     _data.vfoa = e.Data.Substring(0, 11);
+                    // has the mode changed? if so, ask for new dsp string.
+                    if(!e.Data.Substring(27, 2).Equals(_data.rawmode))
+                        _cat.WriteCommand("ZZMN" + e.Data.Substring(27, 2) + ";");
                     _data.Mode = e.Data.Substring(27, 2);
                     _data.mox = (e.Data.Substring(26, 1).Equals(1)) ? true : false;
                     break;
+                // vfob
                 case "ZZFB":
                     _data.vfob = e.Data;
                     break;
+                // band
                 case "ZZBS":
                     _data.Band = e.Data;
                     break;
+                // display mode
+                case "ZZDM":
+                    _data.DisplayMode = e.Data;
+                    break;
+                // mode dsp filters
+                case "ZZMN":
+                    ProcessDSPFilters(e.Data);
+                    break;
             }
+        }
+
+        private static void ProcessDSPFilters(String data)
+        {
+            // TODO: implement this crap
+            String s = data.Substring(2);
+            //MatchCollection mc = Regex.Matches(s, "");
         }
 
         private String GetDropdownText(String s)
         {
             StringBuilder output = new StringBuilder();            
-            MatchCollection mc = Regex.Matches(s, "{([A-Z~]+)}");            
+            MatchCollection mc = Regex.Matches(s, "{([A-Z~]+)}", RegexOptions.Compiled);            
 
             if(mc.Count == 0) return String.Empty; 
 
@@ -237,7 +301,7 @@ namespace MiniDeluxe
                         output.Append("AGC: Med" + "\u0009");
                         break;
                     case "DISPLAY":
-                        output.Append("Display: Off" + "\u0009");
+                        output.Append("Display: " + _data.DisplayMode + "\u0009");
                         break;
                     case "PREAMP":
                         output.Append("Preamp: High" + "\u0009");
@@ -250,7 +314,7 @@ namespace MiniDeluxe
             return output.ToString();
         }
 
-        private String GetDropdownList(String s)
+        private static String GetDropdownList(String s)
         {
             String q = s.Substring(s.IndexOf("{") + 1, (s.IndexOf("}") - s.IndexOf("{") - 1));
             String output;
@@ -270,6 +334,7 @@ namespace MiniDeluxe
                     output = "Spectrum,Panadapter,Scope,Phase,Phase2,Waterfall,Histogram,Off";
                     break;
                 case "DSP FLTR":
+                    // TODO: replace with DSP list for current mode
                     output = "6.0kHz,4.0kHz,2.6kHz,2.1kHz,1.0kHz,500Hz,250Hz,100Hz,50Hz,25Hz,VAR1,VAR2";
                     break;
                 case "PREAMP":

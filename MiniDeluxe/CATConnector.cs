@@ -62,8 +62,8 @@ namespace MiniDeluxe
         }
 
         private void ParseCommand(String command)
-        {           
-            Match m = Regex.Match(command, "([A-Z]{2,4})(.*);");
+        {
+            Match m = Regex.Match(command, "([A-Z]{2,4})(.*);", RegexOptions.Compiled);
             if (!m.Success) return;
             
             CATEventArgs cea = new CATEventArgs(m.Groups[1].ToString(), m.Groups[2].ToString());

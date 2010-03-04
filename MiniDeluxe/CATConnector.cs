@@ -20,7 +20,7 @@ namespace MiniDeluxe
             _buffer = new StringBuilder();
 
             _port = port;            
-            port.Open();
+            _port.Open();
 
             _readThread = new Thread(ReadThread);
             _readThread.Start();

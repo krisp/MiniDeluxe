@@ -345,8 +345,8 @@ namespace MiniDeluxe
         }
         #endregion
 
-        #region Static Functions
-        private static String GetDropdownText(String s)
+        #region Get Functions
+        private String GetDropdownText(String s)
         {
             StringBuilder output = new StringBuilder();            
             MatchCollection mc = Regex.Matches(s, "{([A-Z~]+)}", RegexOptions.Compiled);            
@@ -380,7 +380,7 @@ namespace MiniDeluxe
             return output.ToString();
         }
 
-        private static String GetDropdownList(String s)
+        private String GetDropdownList(String s)
         {
             String q = s.Substring(s.IndexOf("{") + 1, (s.IndexOf("}") - s.IndexOf("{") - 1));
             String output;

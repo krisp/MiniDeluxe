@@ -14,14 +14,16 @@ namespace MiniDeluxe
 
         private bool stopListening = false;
         private bool stopClients = false;
-
-        private ArrayList clients;
+        
         private TcpListener listener;
 
         public HRDTCPServer()
         {
-            clients = new ArrayList();
             listener = new TcpListener(IPAddress.Any, 7810);
+        }
+
+        public void Start()
+        {
             listener.Start();
             Thread listenerThread = new Thread(ListenerThread);
             listenerThread.Start();

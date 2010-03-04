@@ -9,18 +9,21 @@ namespace MiniDeluxe
 {
     class MiniDeluxe
     {
+        #region Declarations
         private const String Serialport = "COM20";
-        private const double Updatetime = 1000;
-        readonly Timer _timer;
+        private const double Updatetimeshort = 1000;
+        private const double Updatetimelong = 5000;
+        private readonly Timer _timerShort;
+        private readonly Timer _timerLong;
         readonly CATConnector _cat;
         readonly HRDTCPServer _server;
         RadioData _data;
-
         struct RadioData
         {
             private string _mode;
             private string _band;
             private string _displayMode;
+            private string _agc;
 
             public string vfoa;
             public string vfob;
@@ -166,18 +169,50 @@ namespace MiniDeluxe
                     }
                 }
             }
+            public string AGC
+            {
+                get { return _agc; }
+                set
+                {
+                    switch (value)
+                    {
+                        case "0":
+                            _agc = "Fixed";
+                            break;
+                        case "1":
+                            _agc = "Long";
+                            break;
+                        case "2":
+                            _agc = "Slow";
+                            break;
+                        case "3":
+                            _agc = "Med";
+                            break;
+                        case "4":
+                            _agc = "Fast";
+                            break;
+                        case "5":
+                            _agc = "Custom";
+                            break;
+                    }
+                }
+            }
         }
+        #endregion
 
+        #region Constructor
         public MiniDeluxe()
         {
             _data = new RadioData {vfoa = "0", vfob = "0", Mode = "00", mox = false, DisplayMode = "0"};
             _cat = new CATConnector(new SerialPort(Serialport));
-            _timer = new Timer(Updatetime);
+            _timerShort = new Timer(Updatetimeshort);
+            _timerLong = new Timer(Updatetimelong);
             _server = new HRDTCPServer();
 
             // event handlers
             _cat.CATEvent += CatcatEvent;
-            _timer.Elapsed += TimerElapsed;
+            _timerShort.Elapsed += TimerShortElapsed;
+            _timerLong.Elapsed += TimerLongElapsed;
             _server.HRDTCPEvent += ServerHRDTCPEvent;
 
             // write initial commands to the radio to fill in initial data
@@ -185,16 +220,86 @@ namespace MiniDeluxe
             _cat.WriteCommand("ZZFB;");
             _cat.WriteCommand("ZZBS;");
             _cat.WriteCommand("ZZDM;");
+            _cat.WriteCommand("ZZGT;");
             
-            _timer.Start();
-            _server.Start();            
+            _timerShort.Start();
+            _timerLong.Start();
+            _server.Start();
         }
+        #endregion
 
+        #region Event Handlers
         void ServerHRDTCPEvent(object sender, HRDTCPEventArgs e)
         {
             String s = e.ToString().ToUpper();
             BinaryWriter bw = new BinaryWriter(e.Client.GetStream());
 
+            if(s.Contains("GET"))
+            {
+                ProcessHRDTCPGetCommand(s,bw);                                          
+            }
+        }
+
+        void TimerShortElapsed(object sender, ElapsedEventArgs e)
+        {
+            _cat.WriteCommand("ZZIF;");
+            _cat.WriteCommand("ZZFB;");
+        }
+
+        void TimerLongElapsed(object sender, ElapsedEventArgs e)
+        {
+            _cat.WriteCommand("ZZBS;");
+            _cat.WriteCommand("ZZDM;");
+            _cat.WriteCommand("ZZGT;");
+        }
+
+        void CatcatEvent(object sender, CATEventArgs e)
+        {
+            switch(e.Command)
+            {
+                // vfoa, mode, xmit status
+                case "ZZIF":                
+                    _data.vfoa = e.Data.Substring(0, 11);
+                    // has the mode changed? if so, ask for new dsp string.
+                    if(!e.Data.Substring(27, 2).Equals(_data.rawmode))
+                        _cat.WriteCommand("ZZMN" + e.Data.Substring(27, 2) + ";");
+                    _data.Mode = e.Data.Substring(27, 2);
+                    _data.mox = (e.Data.Substring(26, 1).Equals(1)) ? true : false;
+                    break;
+                // vfob
+                case "ZZFB":
+                    _data.vfob = e.Data;
+                    break;
+                // band
+                case "ZZBS":
+                    _data.Band = e.Data;
+                    break;
+                // display mode
+                case "ZZDM":
+                    _data.DisplayMode = e.Data;
+                    break;
+                // agc
+                case "ZZGT":
+                    _data.AGC = e.Data;
+                    break;
+                // mode dsp filters
+                case "ZZMN":
+                    ProcessDSPFilters(e.Data);
+                    break;
+            }
+        }
+        #endregion
+
+        #region Processing Functions
+        private static void ProcessDSPFilters(String data)
+        {
+            // TODO: implement this crap
+            String s = data.Substring(2);
+            //MatchCollection mc = Regex.Matches(s, "");
+        }
+
+        void ProcessHRDTCPGetCommand(String s, BinaryWriter bw)
+        {
             if (s.Contains("GET ID"))
             {
                 bw.Write(HRDMessage.HRDMessageToByteArray("Ham Radio Deluxe"));
@@ -223,7 +328,7 @@ namespace MiniDeluxe
             {
                 bw.Write(HRDMessage.HRDMessageToByteArray(GetDropdownText(s)));
             }
-            else if( s.Contains("GET DROPDOWN-LIST"))
+            else if (s.Contains("GET DROPDOWN-LIST"))
             {
                 bw.Write(HRDMessage.HRDMessageToByteArray(GetDropdownList(s)));
             }
@@ -233,54 +338,15 @@ namespace MiniDeluxe
             }
         }
 
-        void TimerElapsed(object sender, ElapsedEventArgs e)
+        void ProcessHRDTCPSetCommand(String s, BinaryWriter bw)
         {
-            _cat.WriteCommand("ZZIF;");
-            _cat.WriteCommand("ZZFB;");
-            _cat.WriteCommand("ZZBS;");
-            _cat.WriteCommand("ZZDM;");
-        }
 
-        void CatcatEvent(object sender, CATEventArgs e)
-        {
-            switch(e.Command)
-            {
-                // vfoa, mode, xmit status
-                case "ZZIF":                
-                    _data.vfoa = e.Data.Substring(0, 11);
-                    // has the mode changed? if so, ask for new dsp string.
-                    if(!e.Data.Substring(27, 2).Equals(_data.rawmode))
-                        _cat.WriteCommand("ZZMN" + e.Data.Substring(27, 2) + ";");
-                    _data.Mode = e.Data.Substring(27, 2);
-                    _data.mox = (e.Data.Substring(26, 1).Equals(1)) ? true : false;
-                    break;
-                // vfob
-                case "ZZFB":
-                    _data.vfob = e.Data;
-                    break;
-                // band
-                case "ZZBS":
-                    _data.Band = e.Data;
-                    break;
-                // display mode
-                case "ZZDM":
-                    _data.DisplayMode = e.Data;
-                    break;
-                // mode dsp filters
-                case "ZZMN":
-                    ProcessDSPFilters(e.Data);
-                    break;
-            }
-        }
 
-        private static void ProcessDSPFilters(String data)
-        {
-            // TODO: implement this crap
-            String s = data.Substring(2);
-            //MatchCollection mc = Regex.Matches(s, "");
         }
+        #endregion
 
-        private String GetDropdownText(String s)
+        #region Static Functions
+        private static String GetDropdownText(String s)
         {
             StringBuilder output = new StringBuilder();            
             MatchCollection mc = Regex.Matches(s, "{([A-Z~]+)}", RegexOptions.Compiled);            
@@ -298,13 +364,13 @@ namespace MiniDeluxe
                         output.Append("Band: " + _data.Band + "\u0009");
                         break;
                     case "AGC":
-                        output.Append("AGC: Med" + "\u0009");
+                        output.Append("AGC: " + _data.AGC + "\u0009");
                         break;
                     case "DISPLAY":
                         output.Append("Display: " + _data.DisplayMode + "\u0009");
                         break;
                     case "PREAMP":
-                        output.Append("Preamp: High" + "\u0009");
+                        output.Append("Preamp: N/A" + "\u0009");
                         break;
                     case "DSP~FLTR":
                         output.Append("DSP Fltr: 2.3kHz" + "\u0009");
@@ -347,5 +413,6 @@ namespace MiniDeluxe
 
             return output;
         }
+        #endregion
     }  
 }

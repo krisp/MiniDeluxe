@@ -3,7 +3,6 @@ using System.Text;
 using System.Net.Sockets;
 using System.Net;
 using System.Threading;
-using System.Collections;
 using System.IO;
 
 namespace MiniDeluxe
@@ -15,16 +14,16 @@ namespace MiniDeluxe
         private bool stopListening = false;
         private bool stopClients = false;
         
-        private TcpListener listener;
+        private readonly TcpListener _listener;
 
         public HRDTCPServer()
         {
-            listener = new TcpListener(IPAddress.Any, 7810);
+            _listener = new TcpListener(IPAddress.Any, 7810);
         }
 
         public void Start()
         {
-            listener.Start();
+            _listener.Start();
             Thread listenerThread = new Thread(ListenerThread);
             listenerThread.Start();
         }
@@ -33,7 +32,7 @@ namespace MiniDeluxe
         {
             while (!stopListening)
             {
-                TcpClient client = listener.AcceptTcpClient();
+                TcpClient client = _listener.AcceptTcpClient();
                 Thread clientThread = new Thread(ClientThread);
                 clientThread.Start(client);
             }

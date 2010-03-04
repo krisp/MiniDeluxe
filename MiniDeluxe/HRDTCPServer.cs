@@ -35,7 +35,6 @@ namespace MiniDeluxe
             {
                 TcpClient client = listener.AcceptTcpClient();
                 Thread clientThread = new Thread(ClientThread);
-                clients.Add(client);
                 clientThread.Start(client);
             }
         }
@@ -55,9 +54,7 @@ namespace MiniDeluxe
                 HRDTCPEventArgs e = new HRDTCPEventArgs(client, msg);
                 if (HRDTCPEvent != null)
                     HRDTCPEvent(this, e);
-            }            
-            
-            clients.Remove(client);
+            }                       
         }
     }
     

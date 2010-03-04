@@ -1,91 +1,89 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.IO.Ports;
 using System.Timers;
-using System.Net.Sockets;
 using System.IO;
 
 namespace MiniDeluxe
 {
     class MiniDeluxe
     {
-        Timer timer;
-        CATConnector cat;
-        HRDTCPServer server;
-        RadioData data;
+        readonly Timer _timer;
+        readonly CATConnector _cat;
+        readonly HRDTCPServer _server;
+        RadioData _data;
 
         struct RadioData
         {
-            private string _Mode;
-            private string _Band;
+            private string _mode;
+            private string _band;
 
-            public string VFOA;
-            public string VFOB;
-            public bool MOX;
+            public string vfoa;
+            public string vfob;
+            public bool mox;
 
             public string Mode
             {
-                get { return _Mode; }
+                get { return _mode; }
                 set
                 {
                     switch (value)
                     {
                         case "00":
-                            _Mode = "LSB";
+                            _mode = "LSB";
                             break;
                         case "01":
-                            _Mode = "USB";
+                            _mode = "USB";
                             break;
                         case "02":
-                            _Mode = "DSB";
+                            _mode = "DSB";
                             break;
                         case "03":
-                            _Mode = "CWL";
+                            _mode = "CWL";
                             break;
                         case "04":
-                            _Mode = "CWU";
+                            _mode = "CWU";
                             break;
                         case "05":
-                            _Mode = "FMN";
+                            _mode = "FMN";
                             break;
                         case "06":
-                            _Mode = "AM";
+                            _mode = "AM";
                             break;
                         case "07":
-                            _Mode = "DIGU";
+                            _mode = "DIGU";
                             break;
                         case "08":
-                            _Mode = "SPEC";
+                            _mode = "SPEC";
                             break;
                         case "09":
-                            _Mode = "DIGL";
+                            _mode = "DIGL";
                             break;
                         case "10":
-                            _Mode = "SAM";
+                            _mode = "SAM";
                             break;
                         case "11":
-                            _Mode = "DRM";
+                            _mode = "DRM";
                             break;
                     }
                 }
             }
             public string Band
             {
-                get { return _Band; }
+                get { return _band; }
                 set
                 {
                     switch (value)
                     {
                         case "888":
-                            _Band = "GEN";
+                            _band = "GEN";
                             break;
                         case "999":
-                            _Band = "WWV";
+                            _band = "WWV";
                             break;
                         default:
-                            _Band = value;
+                            _band = value;
                             break;
                     }
                 }
@@ -94,28 +92,28 @@ namespace MiniDeluxe
 
         public MiniDeluxe()
         {
-            data = new RadioData();
-            data.VFOA = "0";
-            data.VFOB = "0";
-            data.Mode = "";
-            data.MOX = false;
+            _data = new RadioData();
+            _data.vfoa = "0";
+            _data.vfob = "0";
+            _data.Mode = "";
+            _data.mox = false;
 
-            cat = new CATConnector(new SerialPort("COM20"));
-            cat.CATEvent += new CATEventHandler(cat_CATEvent);
+            _cat = new CATConnector(new SerialPort("COM20"));
+            _cat.CATEvent += CatcatEvent;
 
-            cat.WriteCommand("ZZIF;");
-            cat.WriteCommand("ZZFB;");
-            cat.WriteCommand("ZZBS;");
+            _cat.WriteCommand("ZZIF;");
+            _cat.WriteCommand("ZZFB;");
+            _cat.WriteCommand("ZZBS;");
 
-            timer = new Timer(1000);
-            timer.Elapsed += new ElapsedEventHandler(timer_Elapsed);
-            timer.Start();
+            _timer = new Timer(1000);
+            _timer.Elapsed += TimerElapsed;
+            _timer.Start();
 
-            server = new HRDTCPServer();
-            server.HRDTCPEvent += new HRDTCPEventHandler(server_HRDTCPEvent);
+            _server = new HRDTCPServer();
+            _server.HRDTCPEvent += ServerHRDTCPEvent;
         }
 
-        void server_HRDTCPEvent(object sender, HRDTCPEventArgs e)
+        void ServerHRDTCPEvent(object sender, HRDTCPEventArgs e)
         {
             String s = e.ToString().ToUpper();
             BinaryWriter bw = new BinaryWriter(e.Client.GetStream());
@@ -130,7 +128,7 @@ namespace MiniDeluxe
             }
             else if (s.Contains("GET FREQUENCY"))
             {
-                bw.Write(HRDMessage.HRDMessageToByteArray(data.VFOA));
+                bw.Write(HRDMessage.HRDMessageToByteArray(_data.vfoa));
             }
             else if (s.Contains("GET RADIO"))
             {
@@ -142,7 +140,7 @@ namespace MiniDeluxe
             }
             else if (s.Contains("GET FREQUENCIES"))
             {
-                bw.Write(HRDMessage.HRDMessageToByteArray(data.VFOA + "-" + data.VFOB));
+                bw.Write(HRDMessage.HRDMessageToByteArray(_data.vfoa + "-" + _data.vfob));
             }
             else if (s.Contains("GET DROPDOWN-TEXT"))
             {
@@ -154,27 +152,27 @@ namespace MiniDeluxe
             }
         }
 
-        void timer_Elapsed(object sender, ElapsedEventArgs e)
+        void TimerElapsed(object sender, ElapsedEventArgs e)
         {
-            cat.WriteCommand("ZZIF;");
-            cat.WriteCommand("ZZFB;");
-            cat.WriteCommand("ZZBS;");
+            _cat.WriteCommand("ZZIF;");
+            _cat.WriteCommand("ZZFB;");
+            _cat.WriteCommand("ZZBS;");
         }
 
-        void cat_CATEvent(object sender, CATEventArgs e)
+        void CatcatEvent(object sender, CATEventArgs e)
         {
             switch(e.Command)
             {
                 case "ZZIF":                
-                    data.VFOA = e.Data.Substring(0, 11);
-                    data.Mode = e.Data.Substring(27, 2);
-                    data.MOX = (e.Data.Substring(26, 1).Equals(1)) ? true : false;
+                    _data.vfoa = e.Data.Substring(0, 11);
+                    _data.Mode = e.Data.Substring(27, 2);
+                    _data.mox = (e.Data.Substring(26, 1).Equals(1)) ? true : false;
                     break;
                 case "ZZFB":
-                    data.VFOB = e.Data;
+                    _data.vfob = e.Data;
                     break;
                 case "ZZBS":
-                    data.Band = e.Data;
+                    _data.Band = e.Data;
                     break;
             }
         }
@@ -190,10 +188,10 @@ namespace MiniDeluxe
                     switch(g.Value)
                     {
                         case "MODE":
-                            output.Append("Mode: " + data.Mode + "\u0009");
+                            output.Append("Mode: " + _data.Mode + "\u0009");
                             break;
                         case "BAND":
-                            output.Append("Band: " + data.Band + "\u0009");
+                            output.Append("Band: " + _data.Band + "\u0009");
                             break;
                     }
                 }

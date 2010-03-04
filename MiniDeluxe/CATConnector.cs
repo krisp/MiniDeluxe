@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.IO.Ports;
@@ -11,33 +10,34 @@ namespace MiniDeluxe
     {
         public event CATEventHandler CATEvent;
         
-        private SerialPort port;
-        private Thread readThread;
-        private StringBuilder buffer;
-        private bool stopThread = false;        
+        private readonly SerialPort _port;
+        private readonly Thread _readThread;
+        private StringBuilder _buffer;
+        private bool _stopThread;        
 
         public CATConnector(SerialPort port)
         {
-            buffer = new StringBuilder();
+            _buffer = new StringBuilder();
 
-            this.port = port;            
+            _port = port;            
             port.Open();
 
-            readThread = new Thread(new ThreadStart(ReadThread));
-            readThread.Start();
+            _readThread = new Thread(ReadThread);
+            _readThread.Start();
         }
 
         private void ReadThread()
         {
-            while (!stopThread)
+            while (!_stopThread)
             {
                 try
                 {
-                    char b = (char)port.ReadChar();
-                    buffer.Append(b);
+                    char b = (char)_port.ReadChar();
+                    _buffer.Append(b);
                     ProcessData();
                 }
-                catch { }
+                catch
+                { }
             }
         }
 
@@ -45,52 +45,50 @@ namespace MiniDeluxe
         {
             try
             {
-                port.Write(command);
+                _port.Write(command);
             }
-            catch { }
+            catch
+            {
+            }
         }
 
         private void ProcessData()
         {
-            if (buffer.ToString().EndsWith(";"))
+            if (_buffer.ToString().EndsWith(";"))
             {
-                ParseCommand(buffer.ToString());
-                buffer = new StringBuilder();
+                ParseCommand(_buffer.ToString());
+                _buffer = new StringBuilder();
             }
         }
 
         private void ParseCommand(String command)
         {           
             Match m = Regex.Match(command, "([A-Z]{2,4})(.*);");
-            if (m.Success)
-            {
-                CATEventArgs cea = new CATEventArgs(m.Groups[1].ToString(), m.Groups[2].ToString());
-                if (CATEvent != null)
-                    CATEvent(this, cea);               
-                return;
-            }
+            if (!m.Success) return;
+            
+            CATEventArgs cea = new CATEventArgs(m.Groups[1].ToString(), m.Groups[2].ToString());
+            if (CATEvent != null)
+                CATEvent(this, cea);
+            return;
         }
 
         public void Close()
         {
-            stopThread = true;
-            port.Close();
+            _stopThread = true;
+            _port.Close();
         }
     }
    
     public delegate void CATEventHandler(object sender, CATEventArgs e);
     public class CATEventArgs : EventArgs
     {
-        private String _command;
-        private String _data;
-
-        public String Data { get { return _data; } set { _data = value; } }
-        public String Command { get { return _command; } set { _command = value; } }
+        public String Data { get; set; }
+        public String Command { get; set; }
 
         public CATEventArgs(String command, String data)
         {
-            _command = command;
-            _data = data;
+            Command = command;
+            Data = data;
         }
 
         public CATEventArgs() { }

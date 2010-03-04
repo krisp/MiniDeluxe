@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Net.Sockets;
 using System.Net;
@@ -19,12 +18,13 @@ namespace MiniDeluxe
         private ArrayList clients;
         private TcpListener listener;
 
+
         public HRDTCPServer()
         {
             clients = new ArrayList();
             listener = new TcpListener(IPAddress.Any, 7810);
             listener.Start();
-            Thread listenerThread = new Thread(new ThreadStart(ListenerThread));
+            Thread listenerThread = new Thread(ListenerThread);
             listenerThread.Start();
         }
 
@@ -32,8 +32,8 @@ namespace MiniDeluxe
         {
             while (!stopListening)
             {
-                TcpClient client = this.listener.AcceptTcpClient();
-                Thread clientThread = new Thread(new ParameterizedThreadStart(ClientThread));
+                TcpClient client = listener.AcceptTcpClient();
+                Thread clientThread = new Thread(ClientThread);
                 clients.Add(client);
                 clientThread.Start(client);
             }
@@ -42,8 +42,7 @@ namespace MiniDeluxe
         private void ClientThread(object o)
         {
             TcpClient client = (TcpClient)o;            
-            BinaryReader br = new BinaryReader(client.GetStream());                       
-            BinaryWriter bw = new BinaryWriter(client.GetStream());
+            BinaryReader br = new BinaryReader(client.GetStream());                                   
 
             while (!stopClients)
             {
@@ -75,12 +74,14 @@ namespace MiniDeluxe
         public static byte[] HRDMessageToByteArray(String szText)
         {            
             // create HRD message
-            HRDMessageBlock msg = new HRDMessageBlock();
-            msg.nChecksum = 0;
-            msg.nSanity1 = 0x1234ABCD;
-            msg.nSanity2 = 0xABCD1234;
-            msg.szText = Encoding.Unicode.GetBytes(szText + "\0"); 
-            msg.nSize = (uint)Encoding.Unicode.GetByteCount(szText + "\0") + (sizeof(uint) * 4);
+            HRDMessageBlock msg = new HRDMessageBlock
+              {
+                  nChecksum = 0,
+                  nSanity1 = 0x1234ABCD,
+                  nSanity2 = 0xABCD1234,
+                  szText = Encoding.Unicode.GetBytes(szText + "\0"),
+                  nSize = (uint)Encoding.Unicode.GetByteCount(szText + "\0") + (sizeof(uint) * 4)                      
+              };
 
             // Serialize it
             int len = (int)msg.nSize;
@@ -117,7 +118,7 @@ namespace MiniDeluxe
     public delegate void HRDTCPEventHandler(object sender, HRDTCPEventArgs e);
     public class HRDTCPEventArgs : EventArgs
     {
-        private TcpClient _client;
+        private readonly TcpClient _client;
         private HRDMessageBlock _msg;
 
         public TcpClient Client { get { return _client; } }
@@ -125,8 +126,8 @@ namespace MiniDeluxe
 
         public HRDTCPEventArgs(TcpClient client, HRDMessageBlock msg)
         {
-            this._client = client;
-            this._msg = msg;
+            _client = client;
+            _msg = msg;
         }
 
         public override String ToString()

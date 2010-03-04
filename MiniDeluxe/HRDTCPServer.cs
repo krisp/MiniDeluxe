@@ -18,7 +18,6 @@ namespace MiniDeluxe
         private ArrayList clients;
         private TcpListener listener;
 
-
         public HRDTCPServer()
         {
             clients = new ArrayList();
@@ -118,21 +117,18 @@ namespace MiniDeluxe
     public delegate void HRDTCPEventHandler(object sender, HRDTCPEventArgs e);
     public class HRDTCPEventArgs : EventArgs
     {
-        private readonly TcpClient _client;
-        private HRDMessageBlock _msg;
-
-        public TcpClient Client { get { return _client; } }
-        public HRDMessageBlock Message { get { return _msg; } }
+        public TcpClient Client { get; private set; }
+        public HRDMessageBlock Message { get; private set; }
 
         public HRDTCPEventArgs(TcpClient client, HRDMessageBlock msg)
         {
-            _client = client;
-            _msg = msg;
+            Client = client;
+            Message = msg;
         }
 
         public override String ToString()
         {
-            return new String(Encoding.Unicode.GetChars(_msg.szText));
+            return new String(Encoding.Unicode.GetChars(Message.szText));
         }
     }
 }

@@ -11,14 +11,14 @@ namespace MiniDeluxe
     {
         public event HRDTCPEventHandler HRDTCPEvent;
 
-        private bool stopListening = false;
-        private bool stopClients = false;
+        private bool _stopListening;
+        private bool _stopClients;
         
         private readonly TcpListener _listener;
 
         public HRDTCPServer()
         {
-            _listener = new TcpListener(IPAddress.Any, 7810);
+            _listener = new TcpListener(IPAddress.Any, Properties.Settings.Default.Port);
         }
 
         public void Start()
@@ -30,7 +30,7 @@ namespace MiniDeluxe
 
         private void ListenerThread()
         {
-            while (!stopListening)
+            while (!_stopListening)
             {
                 TcpClient client = _listener.AcceptTcpClient();
                 Thread clientThread = new Thread(ClientThread);
@@ -43,7 +43,7 @@ namespace MiniDeluxe
             TcpClient client = (TcpClient)o;            
             BinaryReader br = new BinaryReader(client.GetStream());                                   
 
-            while (!stopClients)
+            while (!_stopClients)
             {
                 HRDMessageBlock msg = HRDMessage.BytesToHRDMessage(br);
                 
@@ -54,6 +54,13 @@ namespace MiniDeluxe
                 if (HRDTCPEvent != null)
                     HRDTCPEvent(this, e);
             }                       
+        }
+
+        public void Close()
+        {
+            _stopListening = true;
+            _stopClients = true;
+            _listener.Stop();
         }
     }
     

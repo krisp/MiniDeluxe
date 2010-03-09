@@ -7,16 +7,13 @@ using System.IO;
 
 namespace MiniDeluxe
 {
-    class MiniDeluxe
+    public class MiniDeluxe
     {
-        #region Declarations
-        private const String Serialport = "COM20";
-        private const double Updatetimeshort = 1000;
-        private const double Updatetimelong = 5000;
-        private readonly Timer _timerShort;
-        private readonly Timer _timerLong;
-        readonly CATConnector _cat;
-        readonly HRDTCPServer _server;
+        #region Declarations        
+        private Timer _timerShort;
+        private Timer _timerLong;
+        private CATConnector _cat;
+        private HRDTCPServer _server;
         RadioData _data;
         struct RadioData
         {
@@ -203,28 +200,10 @@ namespace MiniDeluxe
         #region Constructor
         public MiniDeluxe()
         {
-            _data = new RadioData {vfoa = "0", vfob = "0", Mode = "00", mox = false, DisplayMode = "0"};
-            _cat = new CATConnector(new SerialPort(Serialport));
-            _timerShort = new Timer(Updatetimeshort);
-            _timerLong = new Timer(Updatetimelong);
-            _server = new HRDTCPServer();
-
-            // event handlers
-            _cat.CATEvent += CatcatEvent;
-            _timerShort.Elapsed += TimerShortElapsed;
-            _timerLong.Elapsed += TimerLongElapsed;
-            _server.HRDTCPEvent += ServerHRDTCPEvent;
-
-            // write initial commands to the radio to fill in initial data
-            _cat.WriteCommand("ZZIF;");
-            _cat.WriteCommand("ZZFB;");
-            _cat.WriteCommand("ZZBS;");
-            _cat.WriteCommand("ZZDM;");
-            _cat.WriteCommand("ZZGT;");
-            
-            _timerShort.Start();
-            _timerLong.Start();
-            _server.Start();
+            if (Properties.Settings.Default.FirstRun)
+                FirstRun();
+            else
+                Start();
         }
         #endregion
 
@@ -234,10 +213,13 @@ namespace MiniDeluxe
             String s = e.ToString().ToUpper();
             BinaryWriter bw = new BinaryWriter(e.Client.GetStream());
 
-            if(s.Contains("GET"))
-            {
-                ProcessHRDTCPGetCommand(s,bw);                                          
-            }
+            s = s.Remove(s.IndexOf('\0'));
+
+            if(s.Contains("GET"))            
+                ProcessHRDTCPGetCommand(s,bw);                                                      
+            else if(s.Contains("SET"))            
+                ProcessHRDTCPSetCommand(s,bw);
+            
         }
 
         void TimerShortElapsed(object sender, ElapsedEventArgs e)
@@ -300,48 +282,41 @@ namespace MiniDeluxe
 
         void ProcessHRDTCPGetCommand(String s, BinaryWriter bw)
         {
-            if (s.Contains("GET ID"))
-            {
-                bw.Write(HRDMessage.HRDMessageToByteArray("Ham Radio Deluxe"));
-            }
-            else if (s.Contains("GET VERSION"))
-            {
-                bw.Write(HRDMessage.HRDMessageToByteArray("v0.1"));
-            }
-            else if (s.Contains("GET FREQUENCY"))
-            {
-                bw.Write(HRDMessage.HRDMessageToByteArray(_data.vfoa));
-            }
-            else if (s.Contains("GET RADIO"))
-            {
-                bw.Write(HRDMessage.HRDMessageToByteArray("PowerSDR"));
-            }
-            else if (s.Contains("GET CONTEXT"))
-            {
-                bw.Write(HRDMessage.HRDMessageToByteArray("1"));
-            }
-            else if (s.Contains("GET FREQUENCIES"))
-            {
-                bw.Write(HRDMessage.HRDMessageToByteArray(_data.vfoa + "-" + _data.vfob));
-            }
-            else if (s.Contains("GET DROPDOWN-TEXT"))
-            {
-                bw.Write(HRDMessage.HRDMessageToByteArray(GetDropdownText(s)));
-            }
-            else if (s.Contains("GET DROPDOWN-LIST"))
-            {
-                bw.Write(HRDMessage.HRDMessageToByteArray(GetDropdownList(s)));
-            }
-            else
-            {
-                bw.Write(HRDMessage.HRDMessageToByteArray(""));
-            }
+            if (s.Contains("GET ID"))            
+                bw.Write(HRDMessage.HRDMessageToByteArray("Ham Radio Deluxe"));            
+            else if (s.Contains("GET VERSION"))            
+                bw.Write(HRDMessage.HRDMessageToByteArray("v0.1"));            
+            else if (s.Contains("GET FREQUENCY"))            
+                bw.Write(HRDMessage.HRDMessageToByteArray(_data.vfoa));            
+            else if (s.Contains("GET RADIO"))         
+                bw.Write(HRDMessage.HRDMessageToByteArray("PowerSDR"));            
+            else if (s.Contains("GET CONTEXT"))            
+                bw.Write(HRDMessage.HRDMessageToByteArray("1"));           
+            else if (s.Contains("GET FREQUENCIES"))            
+                bw.Write(HRDMessage.HRDMessageToByteArray(_data.vfoa + "-" + _data.vfob));            
+            else if (s.Contains("GET DROPDOWN-TEXT"))            
+                bw.Write(HRDMessage.HRDMessageToByteArray(GetDropdownText(s)));            
+            else if (s.Contains("GET DROPDOWN-LIST"))            
+                bw.Write(HRDMessage.HRDMessageToByteArray(GetDropdownList(s)));            
+            else            
+                bw.Write(HRDMessage.HRDMessageToByteArray(""));            
         }
 
         void ProcessHRDTCPSetCommand(String s, BinaryWriter bw)
-        {
-
-
+        {            
+            Console.WriteLine("SET COMMAND: {0}", s);
+            
+            if (s.Contains("SET DROPDOWN"))
+                SetDropdown(s);
+            else if(s.Contains("SET FREQUENCIES-HZ"))
+            {
+                Match m = Regex.Match(s, "FREQUENCIES-HZ (\\d+) (\\d+)");
+                if (!m.Success) return;
+                _cat.WriteCommand(String.Format("ZZFA{0:00000000000};", long.Parse(m.Groups[1].Value)));
+                _cat.WriteCommand(String.Format("ZZFB{0:00000000000};", long.Parse(m.Groups[2].Value)));
+            }
+            // tell the program that the command executed OK, regardless if it did or not.
+            bw.Write(HRDMessage.HRDMessageToByteArray("OK"));
         }
         #endregion
 
@@ -359,7 +334,7 @@ namespace MiniDeluxe
                 {
                     case "MODE":
                         output.Append("Mode: " + _data.Mode + "\u0009");
-                        break;
+                        break; 
                     case "BAND":
                         output.Append("Band: " + _data.Band + "\u0009");
                         break;
@@ -370,13 +345,16 @@ namespace MiniDeluxe
                         output.Append("Display: " + _data.DisplayMode + "\u0009");
                         break;
                     case "PREAMP":
-                        output.Append("Preamp: N/A" + "\u0009");
+                        output.Append("Preamp: High" + "\u0009");
                         break;
                     case "DSP~FLTR":
-                        output.Append("DSP Fltr: 2.3kHz" + "\u0009");
+                        output.Append("DSP Fltr: 500Hz" + "\u0009");
                         break;
                 }
-            }            
+            }
+            
+            // remove trailing \u0009 or else HRD Logbook wont parse it properly
+            output.Remove(output.Length - 2, 2);
             return output.ToString();
         }
 
@@ -414,5 +392,76 @@ namespace MiniDeluxe
             return output;
         }
         #endregion
+
+        private void SetDropdown(String s)
+        {
+            Match m = Regex.Match(s, "SET DROPDOWN (\\w+) (\\w+) (\\d+)", RegexOptions.Compiled);
+            if(!m.Success) return;
+
+            switch(m.Groups[1].Value)
+            {
+                case "MODE":                    
+                    _cat.WriteCommand(String.Format("ZZMD{0:00};", int.Parse(m.Groups[3].Value)));
+                    break;
+                //TODO: implement more sets
+            }
+        }
+
+        public void Restart()
+        {
+            Stop();
+            Start();
+        }
+
+        public void Stop()
+        {
+            try
+            {
+                if (_timerShort != null) _timerShort.Stop();
+                if (_timerLong != null) _timerLong.Stop();
+                if (_cat != null) _cat.Close();
+                if (_server != null) _server.Close();
+
+                _cat = null;
+                _server = null;
+                _timerShort = null;
+                _timerLong = null;                
+            }
+            catch
+            {                                
+            }            
+        }
+
+        private void Start()
+        {
+            _data = new RadioData { vfoa = "0", vfob = "0", Mode = "00", mox = false, DisplayMode = "0" };
+            _cat = new CATConnector(new SerialPort(Properties.Settings.Default.SerialPort));
+            _timerShort = new Timer(Properties.Settings.Default.HighInterval);
+            _timerLong = new Timer(Properties.Settings.Default.LowInterval);
+            _server = new HRDTCPServer();
+
+            // event handlers
+            _cat.CATEvent += CatcatEvent;
+            _timerShort.Elapsed += TimerShortElapsed;
+            _timerLong.Elapsed += TimerLongElapsed;
+            _server.HRDTCPEvent += ServerHRDTCPEvent;
+
+            // write initial commands to the radio to fill in initial data
+            _cat.WriteCommand("ZZIF;");
+            _cat.WriteCommand("ZZFB;");
+            _cat.WriteCommand("ZZBS;");
+            _cat.WriteCommand("ZZDM;");
+            _cat.WriteCommand("ZZGT;");
+
+            _timerShort.Start();
+            _timerLong.Start();
+            _server.Start();
+        }
+
+        private void FirstRun()
+        {
+            MiniDeluxeForm form = new MiniDeluxeForm(this);            
+            form.Show();
+        }
     }  
 }

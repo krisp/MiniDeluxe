@@ -12,10 +12,11 @@ namespace MiniDeluxe
         [STAThread]
         static void Main()
         {
-            MiniDeluxe deluxe = new MiniDeluxe();
-
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+
+            MiniDeluxe deluxe = new MiniDeluxe();
+
             Application.Run();
         }
     }

@@ -25,7 +25,9 @@ namespace MiniDeluxe
             public string vfoa;
             public string vfob;
             public string rawmode;
+// ReSharper disable UnaccessedField.Local
             public bool mox;
+// ReSharper restore UnaccessedField.Local
 
             public string Mode
             {
@@ -358,7 +360,7 @@ namespace MiniDeluxe
             return output.ToString();
         }
 
-        private String GetDropdownList(String s)
+        private static String GetDropdownList(String s)
         {
             String q = s.Substring(s.IndexOf("{") + 1, (s.IndexOf("}") - s.IndexOf("{") - 1));
             String output;

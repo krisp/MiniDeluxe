@@ -37,8 +37,10 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.tbHigh = new System.Windows.Forms.TextBox();
             this.tbLow = new System.Windows.Forms.TextBox();
+            this.tbHigh = new System.Windows.Forms.TextBox();
+            this.btnStartStop = new System.Windows.Forms.Button();
+            this.cbLocalOnly = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -79,7 +81,7 @@
             // 
             // btnSave
             // 
-            this.btnSave.Location = new System.Drawing.Point(172, 157);
+            this.btnSave.Location = new System.Drawing.Point(172, 189);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(64, 23);
             this.btnSave.TabIndex = 4;
@@ -90,7 +92,7 @@
             // lblStatus
             // 
             this.lblStatus.AutoSize = true;
-            this.lblStatus.Location = new System.Drawing.Point(12, 162);
+            this.lblStatus.Location = new System.Drawing.Point(3, 194);
             this.lblStatus.Name = "lblStatus";
             this.lblStatus.Size = new System.Drawing.Size(47, 13);
             this.lblStatus.TabIndex = 6;
@@ -127,14 +129,6 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Update Intervals (msec)";
             // 
-            // tbHigh
-            // 
-            this.tbHigh.Location = new System.Drawing.Point(166, 22);
-            this.tbHigh.Name = "tbHigh";
-            this.tbHigh.Size = new System.Drawing.Size(51, 20);
-            this.tbHigh.TabIndex = 9;
-            this.tbHigh.Text = "1000";
-            // 
             // tbLow
             // 
             this.tbLow.Location = new System.Drawing.Point(166, 49);
@@ -143,11 +137,43 @@
             this.tbLow.TabIndex = 10;
             this.tbLow.Text = "5000";
             // 
+            // tbHigh
+            // 
+            this.tbHigh.Location = new System.Drawing.Point(166, 22);
+            this.tbHigh.Name = "tbHigh";
+            this.tbHigh.Size = new System.Drawing.Size(51, 20);
+            this.tbHigh.TabIndex = 9;
+            this.tbHigh.Text = "1000";
+            // 
+            // btnStartStop
+            // 
+            this.btnStartStop.Location = new System.Drawing.Point(103, 189);
+            this.btnStartStop.Name = "btnStartStop";
+            this.btnStartStop.Size = new System.Drawing.Size(63, 23);
+            this.btnStartStop.TabIndex = 12;
+            this.btnStartStop.Text = "Start";
+            this.btnStartStop.UseVisualStyleBackColor = true;
+            this.btnStartStop.Click += new System.EventHandler(this.btnStartStop_Click);
+            // 
+            // cbLocalOnly
+            // 
+            this.cbLocalOnly.AutoSize = true;
+            this.cbLocalOnly.Checked = true;
+            this.cbLocalOnly.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbLocalOnly.Location = new System.Drawing.Point(6, 158);
+            this.cbLocalOnly.Name = "cbLocalOnly";
+            this.cbLocalOnly.Size = new System.Drawing.Size(135, 17);
+            this.cbLocalOnly.TabIndex = 13;
+            this.cbLocalOnly.Text = "Local connections only";
+            this.cbLocalOnly.UseVisualStyleBackColor = true;
+            // 
             // MiniDeluxeForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(248, 185);
+            this.ClientSize = new System.Drawing.Size(248, 224);
+            this.Controls.Add(this.cbLocalOnly);
+            this.Controls.Add(this.btnStartStop);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.lblStatus);
             this.Controls.Add(this.btnSave);
@@ -181,6 +207,8 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.TextBox tbLow;
         private System.Windows.Forms.TextBox tbHigh;
+        private System.Windows.Forms.Button btnStartStop;
+        private System.Windows.Forms.CheckBox cbLocalOnly;
     }
 }
 

@@ -30,7 +30,7 @@ namespace MiniDeluxe
         {
             try
             {
-                Properties.Settings.Default.SerialPortIdx = (int)cbSerialport.SelectedIndex;
+                Properties.Settings.Default.SerialPortIdx = cbSerialport.SelectedIndex;
                 Properties.Settings.Default.SerialPort = cbSerialport.Text;
                 Properties.Settings.Default.Port = int.Parse(tbPort.Text);
                 Properties.Settings.Default.HighInterval = double.Parse(tbHigh.Text);

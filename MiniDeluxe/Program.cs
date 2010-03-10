@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Windows.Forms;
 
 namespace MiniDeluxe
@@ -14,9 +13,7 @@ namespace MiniDeluxe
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-
-            MiniDeluxe deluxe = new MiniDeluxe();
-
+            new MiniDeluxe();
             Application.Run();
         }
     }

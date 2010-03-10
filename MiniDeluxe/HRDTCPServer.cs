@@ -9,21 +9,25 @@ namespace MiniDeluxe
 {
     class HRDTCPServer
     {
+        public bool IsListening { get; private set; }
+
         public event HRDTCPEventHandler HRDTCPEvent;
 
         private bool _stopListening;
         private bool _stopClients;
-        
+
         private readonly TcpListener _listener;
 
         public HRDTCPServer()
         {
-            _listener = new TcpListener(IPAddress.Any, Properties.Settings.Default.Port);
+            _listener = new TcpListener(Properties.Settings.Default.LocalOnly ? IPAddress.Loopback : IPAddress.Any, 
+                                            Properties.Settings.Default.Port);
         }
 
         public void Start()
         {
             _listener.Start();
+            IsListening = true;
             Thread listenerThread = new Thread(ListenerThread);
             listenerThread.Start();
         }
@@ -32,9 +36,15 @@ namespace MiniDeluxe
         {
             while (!_stopListening)
             {
-                TcpClient client = _listener.AcceptTcpClient();
-                Thread clientThread = new Thread(ClientThread);
-                clientThread.Start(client);
+                try
+                {
+                    TcpClient client = _listener.AcceptTcpClient();
+                    Thread clientThread = new Thread(ClientThread);
+                    clientThread.Start(client);
+                }
+                catch
+                {
+                }
             }
         }
 
@@ -45,14 +55,21 @@ namespace MiniDeluxe
 
             while (!_stopClients)
             {
-                HRDMessageBlock msg = HRDMessage.BytesToHRDMessage(br);
-                
-                if (msg.nSize == 0)
-                    break;
+                try
+                {
+                    HRDMessageBlock msg = HRDMessage.BytesToHRDMessage(br);
 
-                HRDTCPEventArgs e = new HRDTCPEventArgs(client, msg);
-                if (HRDTCPEvent != null)
-                    HRDTCPEvent(this, e);
+                    if (msg.nSize == 0)
+                        break;
+
+                    HRDTCPEventArgs e = new HRDTCPEventArgs(client, msg);
+                    if (HRDTCPEvent != null)
+                        HRDTCPEvent(this, e);
+
+                }
+                catch
+                {
+                }
             }                       
         }
 
@@ -60,8 +77,9 @@ namespace MiniDeluxe
         {
             _stopListening = true;
             _stopClients = true;
+            IsListening = false;
             _listener.Stop();
-        }
+        }        
     }
     
     public struct HRDMessageBlock

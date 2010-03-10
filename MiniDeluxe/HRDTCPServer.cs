@@ -16,7 +16,7 @@ namespace MiniDeluxe
         private bool _stopListening;
         private bool _stopClients;
         private int _connectionCount;
-        private MiniDeluxe _parent;
+        private readonly MiniDeluxe _parent;
 
         private readonly TcpListener _listener;
 
@@ -24,12 +24,8 @@ namespace MiniDeluxe
         {
             _parent = parent;
             _connectionCount = 0;
-#if DEBUG
-            _listener = new TcpListener(IPAddress.Parse("10.0.0.1"), Properties.Settings.Default.Port);
-#else
             _listener = new TcpListener(Properties.Settings.Default.LocalOnly ? IPAddress.Loopback : IPAddress.Any,
                                             Properties.Settings.Default.Port);
-#endif
         }
 
         public void Start()

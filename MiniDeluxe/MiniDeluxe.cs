@@ -225,7 +225,9 @@ namespace MiniDeluxe
                 ProcessHRDTCPGetCommand(s,bw);                                                      
             else if(s.Contains("SET"))            
                 ProcessHRDTCPSetCommand(s,bw);
-            
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
 
         void TimerShortElapsed(object sender, ElapsedEventArgs e)
@@ -275,6 +277,8 @@ namespace MiniDeluxe
                     ProcessDSPFilters(e.Data);
                     break;
             }
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
         #endregion
 
@@ -432,6 +436,7 @@ namespace MiniDeluxe
                 _server = null;
                 _timerShort = null;
                 _timerLong = null;                
+                SetNotifyIconText("MiniDeluxe - Stopped");
             }
             catch
             {                                
@@ -444,7 +449,7 @@ namespace MiniDeluxe
             _cat = new CATConnector(new SerialPort(Properties.Settings.Default.SerialPort));
             _timerShort = new Timer(Properties.Settings.Default.HighInterval);
             _timerLong = new Timer(Properties.Settings.Default.LowInterval);
-            _server = new HRDTCPServer();
+            _server = new HRDTCPServer(this);
 
             // event handlers
             _cat.CATEvent += CatcatEvent;
@@ -462,6 +467,8 @@ namespace MiniDeluxe
             _timerShort.Start();
             _timerLong.Start();
             _server.Start();
+
+            SetNotifyIconText("MiniDeluxe - Running (0 connections)");
         }
 
         public void ShowOptionsForm()
@@ -479,6 +486,11 @@ namespace MiniDeluxe
         public bool HRDTCPServer_IsListening()
         {
             return _server != null && _server.IsListening;
+        }
+
+        public void SetNotifyIconText(String s)
+        {
+            _notifyIcon.SetNotifyText(s);
         }
     }  
 }

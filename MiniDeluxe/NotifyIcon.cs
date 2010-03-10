@@ -68,5 +68,10 @@ namespace MiniDeluxe
         {
             Application.Exit();
         }
+
+        public void SetNotifyText(String s)
+        {
+            _notifyIcon.Text = s;
+        }
     }
 }

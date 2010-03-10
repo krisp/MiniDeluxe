@@ -15,11 +15,15 @@ namespace MiniDeluxe
 
         private bool _stopListening;
         private bool _stopClients;
+        private int _connectionCount;
+        private MiniDeluxe _parent;
 
         private readonly TcpListener _listener;
 
-        public HRDTCPServer()
+        public HRDTCPServer(MiniDeluxe parent)
         {
+            _parent = parent;
+            _connectionCount = 0;
             _listener = new TcpListener(Properties.Settings.Default.LocalOnly ? IPAddress.Loopback : IPAddress.Any, 
                                             Properties.Settings.Default.Port);
         }
@@ -40,18 +44,19 @@ namespace MiniDeluxe
                 {
                     TcpClient client = _listener.AcceptTcpClient();
                     Thread clientThread = new Thread(ClientThread);
-                    clientThread.Start(client);
+                    clientThread.Start(client);                    
                 }
                 catch
                 {
                 }
+                _parent.SetNotifyIconText("MiniDeluxe - Running (" + ++_connectionCount + " connections)");
             }
         }
 
         private void ClientThread(object o)
-        {
+        {            
             TcpClient client = (TcpClient)o;            
-            BinaryReader br = new BinaryReader(client.GetStream());                                   
+            BinaryReader br = new BinaryReader(client.GetStream());            
 
             while (!_stopClients)
             {
@@ -65,12 +70,12 @@ namespace MiniDeluxe
                     HRDTCPEventArgs e = new HRDTCPEventArgs(client, msg);
                     if (HRDTCPEvent != null)
                         HRDTCPEvent(this, e);
-
                 }
                 catch
                 {
                 }
-            }                       
+            }
+            _parent.SetNotifyIconText("MiniDeluxe - Running (" + --_connectionCount + " connections)");
         }
 
         public void Close()

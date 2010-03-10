@@ -12,10 +12,10 @@
       <Value Profile="(Default)">7809</Value>
     </Setting>
     <Setting Name="LowInterval" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">1000</Value>
+      <Value Profile="(Default)">5000</Value>
     </Setting>
     <Setting Name="HighInterval" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">5000</Value>
+      <Value Profile="(Default)">1000</Value>
     </Setting>
     <Setting Name="FirstRun" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>

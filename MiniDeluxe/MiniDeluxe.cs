@@ -307,9 +307,11 @@ namespace MiniDeluxe
             else if (s.Contains("GET DROPDOWN-TEXT"))            
                 bw.Write(HRDMessage.HRDMessageToByteArray(GetDropdownText(s)));            
             else if (s.Contains("GET DROPDOWN-LIST"))            
-                bw.Write(HRDMessage.HRDMessageToByteArray(GetDropdownList(s)));            
+                bw.Write(HRDMessage.HRDMessageToByteArray(GetDropdownList(s)));
+            else if (s.Contains("GET LOGBOOKUPDATES"))
+                bw.Write(HRDMessage.HRDMessageToByteArray("0"));
             else            
-                bw.Write(HRDMessage.HRDMessageToByteArray(""));            
+                bw.Write(HRDMessage.HRDMessageToByteArray("0"));            
         }
 
         void ProcessHRDTCPSetCommand(String s, BinaryWriter bw)

@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("MiniDeluxe")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Microsoft")]
+[assembly: AssemblyCompany("K1FSY")]
 [assembly: AssemblyProduct("MiniDeluxe")]
-[assembly: AssemblyCopyright("Copyright © Microsoft 2010")]
+[assembly: AssemblyCopyright("Copyright © K1FSY")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

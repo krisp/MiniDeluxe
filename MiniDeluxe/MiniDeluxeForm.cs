@@ -31,7 +31,6 @@ namespace MiniDeluxe
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-
             try 
             {
                 SaveSettings();
@@ -55,7 +54,7 @@ namespace MiniDeluxe
                 Properties.Settings.Default.HighInterval = double.Parse(tbHigh.Text);
                 Properties.Settings.Default.LowInterval = double.Parse(tbLow.Text);
                 Properties.Settings.Default.FirstRun = false;
-                Properties.Settings.Default.LocalOnly = true;
+                Properties.Settings.Default.LocalOnly = cbLocalOnly.Checked;                
                 Properties.Settings.Default.Save();
             }
             catch (Exception e)

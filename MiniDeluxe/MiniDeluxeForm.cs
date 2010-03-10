@@ -83,7 +83,7 @@ namespace MiniDeluxe
                         break;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {                
                 MessageBox.Show("Unable to save: " + ex.Message);
             }            

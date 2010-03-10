@@ -14,6 +14,8 @@ namespace MiniDeluxe
         private Timer _timerLong;
         private CATConnector _cat;
         private HRDTCPServer _server;
+        private readonly NotifyIcon _notifyIcon;
+
         RadioData _data;
         struct RadioData
         {
@@ -202,8 +204,10 @@ namespace MiniDeluxe
         #region Constructor
         public MiniDeluxe()
         {
+            _notifyIcon = new NotifyIcon(this);
+
             if (Properties.Settings.Default.FirstRun)
-                FirstRun();
+                ShowOptionsForm();
             else
                 Start();
         }
@@ -277,8 +281,8 @@ namespace MiniDeluxe
         #region Processing Functions
         private static void ProcessDSPFilters(String data)
         {
-            // TODO: implement this crap
-            String s = data.Substring(2);
+            //implement this crap
+            data.Substring(2);
             //MatchCollection mc = Regex.Matches(s, "");
         }
 
@@ -380,7 +384,7 @@ namespace MiniDeluxe
                     output = "Spectrum,Panadapter,Scope,Phase,Phase2,Waterfall,Histogram,Off";
                     break;
                 case "DSP FLTR":
-                    // TODO: replace with DSP list for current mode
+                    //replace with DSP list for current mode
                     output = "6.0kHz,4.0kHz,2.6kHz,2.1kHz,1.0kHz,500Hz,250Hz,100Hz,50Hz,25Hz,VAR1,VAR2";
                     break;
                 case "PREAMP":
@@ -405,7 +409,7 @@ namespace MiniDeluxe
                 case "MODE":                    
                     _cat.WriteCommand(String.Format("ZZMD{0:00};", int.Parse(m.Groups[3].Value)));
                     break;
-                //TODO: implement more sets
+                //implement more sets
             }
         }
 
@@ -434,7 +438,7 @@ namespace MiniDeluxe
             }            
         }
 
-        private void Start()
+        public void Start()
         {
             _data = new RadioData { vfoa = "0", vfob = "0", Mode = "00", mox = false, DisplayMode = "0" };
             _cat = new CATConnector(new SerialPort(Properties.Settings.Default.SerialPort));
@@ -460,10 +464,21 @@ namespace MiniDeluxe
             _server.Start();
         }
 
-        private void FirstRun()
+        public void ShowOptionsForm()
         {
             MiniDeluxeForm form = new MiniDeluxeForm(this);            
             form.Show();
+        }
+
+        public void EndProgram()
+        {
+            Stop();
+            _notifyIcon.EndProgram();
+        }
+
+        public bool HRDTCPServer_IsListening()
+        {
+            return _server != null && _server.IsListening;
         }
     }  
 }

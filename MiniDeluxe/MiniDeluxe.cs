@@ -198,7 +198,7 @@ namespace MiniDeluxe
                     }
                 }
             }
-            public string smeter
+            public string Smeter
             {
                 get { return _smeter; }
                 set
@@ -243,6 +243,10 @@ namespace MiniDeluxe
             BinaryWriter bw = new BinaryWriter(e.Client.GetStream());
 
             s = s.Remove(s.IndexOf('\0'));
+
+#if DEBUG
+            Console.WriteLine("RX: {0}", s);
+#endif
 
             if(s.Contains("GET"))            
                 ProcessHRDTCPGetCommand(s,bw);                                                      
@@ -301,7 +305,7 @@ namespace MiniDeluxe
                     ProcessDSPFilters(e.Data);
                     break;
                 case "ZZSM":
-                    _data.smeter = e.Data.Substring(1);
+                    _data.Smeter = e.Data.Substring(1);
                     break;
                 case "ZZTX":
                     _data.mox = true;
@@ -335,7 +339,7 @@ namespace MiniDeluxe
             else if (s.Contains("GET CONTEXT"))            
                 bw.Write(HRDMessage.HRDMessageToByteArray("1"));           
             else if (s.Contains("GET FREQUENCIES"))            
-                bw.Write(HRDMessage.HRDMessageToByteArray(_data.vfoa + "-" + _data.vfob));            
+                bw.Write(HRDMessage.HRDMessageToByteArray(_data.vfoa + "-" + _data.vfob));
             else if (s.Contains("GET DROPDOWN-TEXT"))            
                 bw.Write(HRDMessage.HRDMessageToByteArray(GetDropdownText(s)));            
             else if (s.Contains("GET DROPDOWN-LIST"))            
@@ -344,13 +348,12 @@ namespace MiniDeluxe
                 bw.Write(HRDMessage.HRDMessageToByteArray("0"));
             else if (s.Contains("GET BUTTONS"))
                 bw.Write(HRDMessage.HRDMessageToByteArray(GetButtons(s)));
-            else if (s.Contains("GET SMETER-MAIN"))
-            {
-                Console.WriteLine("S-meter {0}", _data.smeter);
-                bw.Write(HRDMessage.HRDMessageToByteArray(String.Format("S,{0},1.5", _data.smeter)));
-            }
+            else if (s.Contains("GET SMETER-MAIN"))            
+                bw.Write(HRDMessage.HRDMessageToByteArray(String.Format("S,{0},1.5", _data.Smeter)));            
             else if (s.Contains("GET BUTTON-SELECT TX"))
                 bw.Write(HRDMessage.HRDMessageToByteArray(_data.mox ? "1" : "0"));
+            else if (s.Contains("GET DROPDOWNS"))
+                bw.Write(HRDMessage.HRDMessageToByteArray(GetDropdowns()));
             else
                 bw.Write(HRDMessage.HRDMessageToByteArray("0"));            
         }
@@ -365,8 +368,12 @@ namespace MiniDeluxe
             {
                 Match m = Regex.Match(s, "FREQUENCIES-HZ (\\d+) (\\d+)");
                 if (!m.Success) return;
-                _cat.WriteCommand(String.Format("ZZFA{0:00000000000};", long.Parse(m.Groups[1].Value)));
-                _cat.WriteCommand(String.Format("ZZFB{0:00000000000};", long.Parse(m.Groups[2].Value)));
+                String vfoa = String.Format("{0:00000000000}", long.Parse(m.Groups[1].Value));
+                String vfob = String.Format("{0:00000000000}", long.Parse(m.Groups[2].Value));
+                _cat.WriteCommand("ZZFA" + vfoa + ";");
+                _cat.WriteCommand("ZZFB" + vfob + ";");
+                _data.vfoa = vfoa;
+                _data.vfob = vfob;
             }
             else if (s.Contains("SET BUTTON-SELECT"))
                 _cat.WriteCommand(SetButton(s));
@@ -419,9 +426,13 @@ namespace MiniDeluxe
                 }
             }
             
-            // remove trailing \u0009 or else HRD Logbook wont parse it properly
-            output.Remove(output.Length - 2, 2);
-            return output.ToString();
+            // remove trailing \u0009 or else HRD Logbook wont parse it properly       
+            return output.ToString().Remove(output.ToString().LastIndexOf('\u0009'));
+        }
+
+        private static String GetDropdowns()
+        {
+            return "Mode,Band,AGC,Display,Preamp,DSP Fltr";
         }
 
         private static String GetDropdownList(String s)
@@ -519,7 +530,7 @@ namespace MiniDeluxe
         {
             try
             {
-                _data = new RadioData { vfoa = "0", vfob = "0", Mode = "00", mox = false, DisplayMode = "0", smeter = "0"};
+                _data = new RadioData { vfoa = "0", vfob = "0", Mode = "00", mox = false, DisplayMode = "0", Smeter = "0"};
                 _cat = new CATConnector(new SerialPort(Properties.Settings.Default.SerialPort));
                 _timerShort = new Timer(Properties.Settings.Default.HighInterval);
                 _timerLong = new Timer(Properties.Settings.Default.LowInterval);

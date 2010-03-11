@@ -15,6 +15,7 @@ namespace MiniDeluxe
         private CATConnector _cat;
         private HRDTCPServer _server;
         private readonly NotifyIcon _notifyIcon;
+        private bool _stopping;
 
         RadioData _data;
         struct RadioData
@@ -501,13 +502,19 @@ namespace MiniDeluxe
         }
 
         public void Restart()
-        {
+        {            
             Stop();
+            
+            while (_stopping)
+            {
+            }
+
             Start();
         }
 
         public void Stop()
         {
+            _stopping = true;
             try
             {
                 if (_timerShort != null) _timerShort.Stop();
@@ -515,15 +522,23 @@ namespace MiniDeluxe
                 if (_cat != null) _cat.Close();
                 if (_server != null) _server.Close();
 
+
+
                 _cat = null;
                 _server = null;
                 _timerShort = null;
                 _timerLong = null;                
                 SetNotifyIconText("MiniDeluxe - Stopped");
             }
-            catch
-            {                                
+            catch(Exception e)
+            {
+                _notifyIcon.MessageBox("While stopping: " + e.Message + "\n" + e.StackTrace);
             }            
+            finally
+            {
+                _stopping = false;
+            }
+            
         }
 
         public void Start()
@@ -537,8 +552,11 @@ namespace MiniDeluxe
                 _server = new HRDTCPServer(this);
 
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                _notifyIcon.MessageBox("While starting: " + e.Message + "\n" +
+                                       "Server is disabled. Please check configuration.");
+                ShowOptionsForm();
                 return;
             }
 

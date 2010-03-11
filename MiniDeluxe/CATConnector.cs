@@ -83,6 +83,7 @@ namespace MiniDeluxe
         {
             _stopThread = true;
             _port.Close();
+            while(_port.IsOpen) { }
         }
     }
    

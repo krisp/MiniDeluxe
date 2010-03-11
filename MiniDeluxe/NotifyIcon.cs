@@ -73,5 +73,10 @@ namespace MiniDeluxe
         {
             _notifyIcon.Text = s;
         }
+
+        public void MessageBox(String s)
+        {
+            System.Windows.Forms.MessageBox.Show(s);
+        }
     }
 }

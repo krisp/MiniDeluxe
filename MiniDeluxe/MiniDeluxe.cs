@@ -348,7 +348,7 @@ namespace MiniDeluxe
             else if (s.Contains("GET LOGBOOKUPDATES"))
                 bw.Write(HRDMessage.HRDMessageToByteArray("0"));
             else if (s.Contains("GET BUTTONS"))
-                bw.Write(HRDMessage.HRDMessageToByteArray(GetButtons(s)));
+                bw.Write(HRDMessage.HRDMessageToByteArray(GetButtons()));
             else if (s.Contains("GET SMETER-MAIN"))            
                 bw.Write(HRDMessage.HRDMessageToByteArray(String.Format("S,{0},1.5", _data.Smeter)));            
             else if (s.Contains("GET BUTTON-SELECT TX"))
@@ -390,7 +390,7 @@ namespace MiniDeluxe
         #endregion
 
         #region Get Functions
-        private static String GetButtons(String s)
+        private static String GetButtons()
         {
             return "TX";
         }

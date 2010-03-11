@@ -68,6 +68,7 @@ namespace MiniDeluxe
                         break;
 
                     HRDTCPEventArgs e = new HRDTCPEventArgs(client, msg);
+
                     if (HRDTCPEvent != null)
                         HRDTCPEvent(this, e);
                 }
@@ -109,6 +110,10 @@ namespace MiniDeluxe
                   szText = Encoding.Unicode.GetBytes(szText + "\0"),
                   nSize = (uint)Encoding.Unicode.GetByteCount(szText + "\0") + (sizeof(uint) * 4)                      
               };
+
+#if DEBUG
+            Console.WriteLine("TX: {0}", szText);
+#endif
 
             // Serialize it
             int len = (int)msg.nSize;

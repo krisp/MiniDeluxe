@@ -17,7 +17,6 @@ namespace MiniDeluxe
         private void MiniDeluxeForm_Load(object sender, EventArgs e)
         {
             lblStatus.Text = _parent.HRDTCPServer_IsListening() ? "Server enabled." : "Server disabled.";
-            btnStartStop.Text = _parent.HRDTCPServer_IsListening() ? "Stop" : "Start";
 
             foreach (String port in SerialPort.GetPortNames())
                 cbSerialport.Items.Add(port);
@@ -62,30 +61,5 @@ namespace MiniDeluxe
                 throw new Exception("Save failed: " + e.Message);
             }
         }
-        
-        private void btnStartStop_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                SaveSettings();
-                switch (btnStartStop.Text)
-                {
-                    case "Start":
-                        _parent.Start();
-                        btnStartStop.Text = "Stop";
-                        lblStatus.Text = "Server enabled.";
-                        break;
-                    case "Stop":
-                        _parent.Stop();
-                        btnStartStop.Text = "Start";
-                        lblStatus.Text = "Server disabled.";
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {                
-                MessageBox.Show("Unable to save: " + ex.Message);
-            }            
-        }
-    }
+     }
 }

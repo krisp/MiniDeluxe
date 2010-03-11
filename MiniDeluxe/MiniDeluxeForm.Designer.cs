@@ -40,7 +40,6 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.tbLow = new System.Windows.Forms.TextBox();
             this.tbHigh = new System.Windows.Forms.TextBox();
-            this.btnStartStop = new System.Windows.Forms.Button();
             this.cbLocalOnly = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -146,16 +145,6 @@
             this.tbHigh.TabIndex = 9;
             this.tbHigh.Text = "1000";
             // 
-            // btnStartStop
-            // 
-            this.btnStartStop.Location = new System.Drawing.Point(103, 189);
-            this.btnStartStop.Name = "btnStartStop";
-            this.btnStartStop.Size = new System.Drawing.Size(63, 23);
-            this.btnStartStop.TabIndex = 12;
-            this.btnStartStop.Text = "Start";
-            this.btnStartStop.UseVisualStyleBackColor = true;
-            this.btnStartStop.Click += new System.EventHandler(this.btnStartStop_Click);
-            // 
             // cbLocalOnly
             // 
             this.cbLocalOnly.AutoSize = true;
@@ -174,7 +163,6 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(248, 224);
             this.Controls.Add(this.cbLocalOnly);
-            this.Controls.Add(this.btnStartStop);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.lblStatus);
             this.Controls.Add(this.btnSave);
@@ -209,7 +197,6 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.TextBox tbLow;
         private System.Windows.Forms.TextBox tbHigh;
-        private System.Windows.Forms.Button btnStartStop;
         private System.Windows.Forms.CheckBox cbLocalOnly;
     }
 }

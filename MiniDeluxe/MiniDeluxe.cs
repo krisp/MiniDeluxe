@@ -31,7 +31,6 @@ namespace MiniDeluxe
             public string vfob;
             public string rawmode;
             public string dspfilters;
-            public string rawdspfilter;
             public bool mox;            
 
             public string Mode
@@ -229,8 +228,6 @@ namespace MiniDeluxe
                 get { return _dspfilter;  }
                 set
                 {
-                    rawdspfilter = value;
-
                     if (_mode.Equals("DSB") || _mode.Equals("USB") || _mode.Contains("DIG"))
                     {
                         switch (value)
@@ -418,7 +415,7 @@ namespace MiniDeluxe
                 case "ZZIF":                
                     _data.vfoa = e.Data.Substring(0, 11);
                     // has the mode changed? if so, ask for new dsp string.
-                    if(!e.Data.Substring(27, 2).Equals(_data.rawmode))
+                    if (!_data.rawmode.Equals(e.Data.Substring(27, 2)))
                         _cat.WriteCommand("ZZMN" + e.Data.Substring(27, 2) + ";");
                     _data.Mode = e.Data.Substring(27, 2);
                     _data.mox = (e.Data.Substring(26, 1).Equals("1")) ? true : false;
@@ -475,8 +472,8 @@ namespace MiniDeluxe
             s.Append(filters.Substring(135, 5) + ",");
             s.Append(filters.Substring(150, 5) + ",");
             s.Append(filters.Substring(165, 5));    
-
-            _data.dspfilters = Regex.Replace(s.ToString(), " ", "");            
+            
+            _data.dspfilters = Regex.Replace(s.ToString(), " ", "");                       
         }
 
         void ProcessHRDTCPGetCommand(String s, BinaryWriter bw)
@@ -627,14 +624,24 @@ namespace MiniDeluxe
 
         private void SetDropdown(String s)
         {
-            Match m = Regex.Match(s, "SET DROPDOWN (\\w+) (\\w+) (\\d+)", RegexOptions.Compiled);
+            Match m = Regex.Match(s, "SET DROPDOWN ([\\w~]+) (\\w+) (\\d+)", RegexOptions.Compiled);
             if(!m.Success) return;
 
             switch(m.Groups[1].Value)
             {
-                case "MODE":                    
-                    _cat.WriteCommand(String.Format("ZZMD{0:00};", int.Parse(m.Groups[3].Value)));
+                case "MODE":
+                    String mode = String.Format("{0:00}", int.Parse(m.Groups[3].Value));
+                    _cat.WriteCommand("ZZMD" + mode + ";");
+                    _cat.WriteCommand("ZZMN" + mode + ";");
+                    _cat.WriteCommand("ZZFI;");
+                    _data.Mode = mode;
                     break;
+                case "DSP~FLTR":
+                    String fltr = String.Format("{0:00}", int.Parse(m.Groups[3].Value));                    
+                    _cat.WriteCommand("ZZFI" + fltr + ";");
+                    _data.DSPFilter = fltr;
+                    break;
+
                 //implement more sets
             }
         }

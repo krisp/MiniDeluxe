@@ -29,8 +29,7 @@ namespace MiniDeluxe
             public string vfoa;
             public string vfob;
             public string rawmode;
-            public bool mox;
-            
+            public bool mox;            
 
             public string Mode
             {
@@ -326,9 +325,7 @@ namespace MiniDeluxe
         }
 
         void ProcessHRDTCPGetCommand(String s, BinaryWriter bw)
-        {
-            // Console.WriteLine("GET COMMAND: {0}", s);
-
+        {            
             if (s.Contains("GET ID"))            
                 bw.Write(HRDMessage.HRDMessageToByteArray("Ham Radio Deluxe"));            
             else if (s.Contains("GET VERSION"))            
@@ -382,7 +379,9 @@ namespace MiniDeluxe
             {
                 Match m = Regex.Match(s, "FREQUENCY-HZ (\\d+)");
                 if(!m.Success) return;
-                _cat.WriteCommand(String.Format("ZZFA{0:00000000000};", long.Parse(m.Groups[1].Value)));
+                String vfoa = String.Format("{0:00000000000}", long.Parse(m.Groups[1].Value));
+                _cat.WriteCommand("ZZFA" + vfoa + ";");
+                _data.vfoa = vfoa;
             }
             // tell the program that the command executed OK, regardless if it did or not.
             bw.Write(HRDMessage.HRDMessageToByteArray("OK"));

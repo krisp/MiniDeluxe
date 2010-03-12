@@ -25,7 +25,8 @@ namespace MiniDeluxe
             private string _displayMode;
             private string _agc;
             private string _smeter;
-            private string _dspfilter;            
+            private string _dspfilter;
+            private string _preamp;
 
             public string vfoa;
             public string vfob;
@@ -356,6 +357,28 @@ namespace MiniDeluxe
                     }
                 }
             }
+            public string Preamp
+            {
+                get { return _preamp; }
+                set
+                {
+                    switch(value)
+                    {
+                        case "0":
+                            _preamp = "Off";
+                            break;
+                        case "1":
+                            _preamp = "Low";
+                            break;
+                        case "2":
+                            _preamp = "Med";
+                            break;
+                        case "3":
+                            _preamp = "High";
+                            break;
+                    }
+                }
+            }
         }
         #endregion
 
@@ -405,6 +428,7 @@ namespace MiniDeluxe
             _cat.WriteCommand("ZZDM;");
             _cat.WriteCommand("ZZGT;");  
             _cat.WriteCommand("ZZFI;");
+            _cat.WriteCommand("ZZPA;");
         }   
 
         void CatcatEvent(object sender, CATEventArgs e)
@@ -448,6 +472,9 @@ namespace MiniDeluxe
                     break;
                 case "ZZFI":
                     _data.DSPFilter = e.Data;
+                    break;
+                case "ZZPA":
+                    _data.Preamp = e.Data;
                     break;
             }
             GC.Collect();
@@ -570,7 +597,7 @@ namespace MiniDeluxe
                         output.Append("Display: " + _data.DisplayMode + "\u0009");
                         break;
                     case "PREAMP":
-                        output.Append("Preamp: High" + "\u0009");
+                        output.Append("Preamp: " + _data.Preamp + "\u0009");
                         break;
                     case "DSP~FLTR":
                         output.Append("DSP Fltr:" + _data.DSPFilter + "Hz" + "\u0009");
@@ -641,8 +668,38 @@ namespace MiniDeluxe
                     _cat.WriteCommand("ZZFI" + fltr + ";");
                     _data.DSPFilter = fltr;
                     break;
-
-                //implement more sets
+                case "AGC":
+                    _cat.WriteCommand("ZZGT" + m.Groups[3].Value + ";");
+                    _data.AGC = m.Groups[3].Value;
+                    break;
+                case "BAND":
+                    String band = Regex.Replace(m.Groups[2].Value, "M", "");                    
+                    if (band.Equals("GEN"))
+                    {
+                        _cat.WriteCommand("ZZBS888;");
+                        _data.Band = "888";
+                        break;
+                    }
+                    if (band.Equals("WWV"))
+                    {
+                        _cat.WriteCommand("ZZBS999;");
+                        _data.Band = "999";
+                        break;
+                    }
+                    if(band.Contains("V")) return; // not implementing vhf band switching yet
+                    
+                    String output = String.Format("{0:000}", int.Parse(band));
+                    _cat.WriteCommand("ZZBS" + output + ";");
+                    _data.Band = output;
+                    break;
+                case "DISPLAY":
+                    _cat.WriteCommand("ZZDM" + m.Groups[3].Value + ";");
+                    _data.DisplayMode = m.Groups[3].Value;
+                    break;
+                case "PREAMP":
+                    _cat.WriteCommand("ZZPA" + m.Groups[3].Value + ";");
+                    _data.Preamp = m.Groups[3].Value;
+                    break;
             }
         }
 
@@ -743,6 +800,7 @@ namespace MiniDeluxe
             _cat.WriteCommand("ZZDM;");
             _cat.WriteCommand("ZZGT;");
             _cat.WriteCommand("ZZFI;");
+            _cat.WriteCommand("ZZPA;");
 
             _timerShort.Start();
             _timerLong.Start();

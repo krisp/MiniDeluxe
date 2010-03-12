@@ -61,5 +61,11 @@ namespace MiniDeluxe
                 throw new Exception("Save failed: " + e.Message);
             }
         }
+
+        private void btnAbout_Click(object sender, EventArgs e)
+        {
+            AboutBox a  = new AboutBox();
+            a.Show();
+        }
      }
 }

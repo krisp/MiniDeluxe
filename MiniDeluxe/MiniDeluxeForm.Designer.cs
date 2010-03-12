@@ -41,6 +41,7 @@
             this.tbLow = new System.Windows.Forms.TextBox();
             this.tbHigh = new System.Windows.Forms.TextBox();
             this.cbLocalOnly = new System.Windows.Forms.CheckBox();
+            this.btnAbout = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -157,11 +158,22 @@
             this.cbLocalOnly.Text = "Local connections only";
             this.cbLocalOnly.UseVisualStyleBackColor = true;
             // 
+            // btnAbout
+            // 
+            this.btnAbout.Location = new System.Drawing.Point(123, 189);
+            this.btnAbout.Name = "btnAbout";
+            this.btnAbout.Size = new System.Drawing.Size(44, 23);
+            this.btnAbout.TabIndex = 14;
+            this.btnAbout.Text = "About";
+            this.btnAbout.UseVisualStyleBackColor = true;
+            this.btnAbout.Click += new System.EventHandler(this.btnAbout_Click);
+            // 
             // MiniDeluxeForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(248, 224);
+            this.Controls.Add(this.btnAbout);
             this.Controls.Add(this.cbLocalOnly);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.lblStatus);
@@ -198,6 +210,7 @@
         private System.Windows.Forms.TextBox tbLow;
         private System.Windows.Forms.TextBox tbHigh;
         private System.Windows.Forms.CheckBox cbLocalOnly;
+        private System.Windows.Forms.Button btnAbout;
     }
 }
 

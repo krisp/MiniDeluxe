@@ -25,12 +25,33 @@ namespace MiniDeluxe
         public AboutBox()
         {
             InitializeComponent();
-            this.Text = String.Format("About {0} {0}", AssemblyTitle);
-            this.labelProductName.Text = AssemblyProduct;
-            this.labelVersion.Text = String.Format("Version {0}", AssemblyVersion);
-            this.labelCopyright.Text = AssemblyCopyright;
-            this.labelCompanyName.Text = AssemblyCompany;
-            this.textBoxDescription.Text = AssemblyDescription;
+
+            String license = "MiniDeluxe is free software: you can redistribute it and/or modify";
+            license += "it under the terms of the GNU General Public License as published by";
+            license += "the Free Software Foundation, either version 3 of the License, or";
+            license += "(at your option) any later version.";
+            license += "MiniDeluxe is distributed in the hope that it will be useful,";
+            license += "but WITHOUT ANY WARRANTY; without even the implied warranty of";
+            license += "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the";
+            license += "GNU General Public License for more details.";
+            license += "\r\n\r\n";
+            license += "You should have received a copy of the GNU General Public License";
+            license += "along with MiniDeluxe.  If not, see <http://www.gnu.org/licenses/>.";
+            license += "\r\n\r\n";
+            license += "MiniDeluxe is Copyright (C) 2010 by K1FSY";
+
+            Text = String.Format("About {0} {0}", AssemblyTitle);
+            labelProductName.Text = AssemblyProduct;
+            labelVersion.Text = String.Format("Version {0}", AssemblyVersion);
+            labelCopyright.Text = AssemblyCopyright;
+            labelCompanyName.Text = AssemblyCompany;
+            textBoxDescription.Text = AssemblyDescription + "\r\n\r\n" + license;           
+        }
+
+        public override sealed string Text
+        {
+            get { return base.Text; }
+            set { base.Text = value; }
         }
 
         #region Assembly Attribute Accessors

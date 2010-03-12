@@ -726,9 +726,10 @@ namespace MiniDeluxe
 
             switch(m.Groups[1].Value)
             {
-                case "TX":                                                            
+                case "TX":
+                    String str = String.Format("ZZTX{0};", _data.mox ? "0" : "1");                                      
                     _data.mox = _data.mox ? false : true;
-                    return String.Format("ZZTX{0};", _data.mox ? "0" : "1");
+                    return str;
             }
 
             return "OK";

@@ -25,7 +25,6 @@ namespace MiniDeluxe
 {
     public class MiniDeluxe
     {
-        #region Declarations        
         private Timer _timerShort;
         private Timer _timerLong;
         private CATConnector _cat;
@@ -396,9 +395,7 @@ namespace MiniDeluxe
                 }
             }
         }
-        #endregion
-
-        #region Constructor
+        
         public MiniDeluxe()
         {
             _notifyIcon = new NotifyIcon(this);
@@ -408,9 +405,7 @@ namespace MiniDeluxe
             else
                 Start();
         }
-        #endregion
 
-        #region Event Handlers
         void ServerHRDTCPEvent(object sender, HRDTCPEventArgs e)
         {
             String s = e.ToString().ToUpper();
@@ -495,11 +490,9 @@ namespace MiniDeluxe
             }
             GC.Collect();
             GC.WaitForPendingFinalizers();
-        }
-        #endregion
-
-        #region Processing Functions
-        private void ProcessDSPFilters(String data)
+        }        
+        
+        void ProcessDSPFilters(String data)
         {
             StringBuilder s = new StringBuilder();
             String filters = data.Substring(2);
@@ -581,15 +574,18 @@ namespace MiniDeluxe
             // tell the program that the command executed OK, regardless if it did or not.
             bw.Write(HRDMessage.HRDMessageToByteArray("OK"));
         }
-        #endregion
-
-        #region Get Functions
-        private static String GetButtons()
+                
+        static String GetButtons()
         {
             return "TX";
         }
-        
-        private String GetDropdownText(String s)
+
+        static String GetDropdowns()
+        {
+            return "Mode,Band,AGC,Display,Preamp,DSP Fltr";
+        }
+
+        String GetDropdownText(String s)
         {
             StringBuilder output = new StringBuilder();            
             MatchCollection mc = Regex.Matches(s, "{([A-Z~]+)}", RegexOptions.Compiled);            
@@ -625,17 +621,12 @@ namespace MiniDeluxe
             return output.ToString().Remove(output.ToString().LastIndexOf('\u0009'));
         }
 
-        private static String GetDropdowns()
-        {
-            return "Mode,Band,AGC,Display,Preamp,DSP Fltr";
-        }
-
-        private String GetDropdownList(String s)
+        String GetDropdownList(String s)
         {
             String q = s.Substring(s.IndexOf("{") + 1, (s.IndexOf("}") - s.IndexOf("{") - 1));
             String output;
 
-            switch(q)
+            switch (q)
             {
                 case "MODE":
                     output = "LSB,USB,DSB,CWL,CWU,FMN,AM,DIGU,SPEC,DIGL,SAM,DRM";
@@ -662,10 +653,9 @@ namespace MiniDeluxe
             }
 
             return output;
-        }
-        #endregion
+        }        
 
-        private void SetDropdown(String s)
+        void SetDropdown(String s)
         {
             Match m = Regex.Match(s, "SET DROPDOWN ([\\w~]+) (\\w+) (\\d+)", RegexOptions.Compiled);
             if(!m.Success) return;
@@ -719,7 +709,7 @@ namespace MiniDeluxe
             }
         }
 
-        private String SetButton(String s)
+        String SetButton(String s)
         {
             Match m = Regex.Match(s, "SET BUTTON-SELECT (\\w+) (\\d)", RegexOptions.Compiled);
             if(!m.Success) return String.Empty;
@@ -735,10 +725,26 @@ namespace MiniDeluxe
             return "OK";
         }
 
+        public void ShowOptionsForm()
+        {
+            MiniDeluxeForm form = new MiniDeluxeForm(this);            
+            form.Show();
+        }
+
+        public bool HRDTCPServer_IsListening()
+        {
+            return _server != null && _server.IsListening;
+        }
+
+        public void SetNotifyIconText(String s)
+        {
+            _notifyIcon.SetNotifyText(s);
+        }
+
         public void Restart()
-        {            
+        {
             Stop();
-            
+
             while (_stopping)
             {
             }
@@ -761,18 +767,18 @@ namespace MiniDeluxe
                 _cat = null;
                 _server = null;
                 _timerShort = null;
-                _timerLong = null;                
+                _timerLong = null;
                 SetNotifyIconText("MiniDeluxe - Stopped");
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 _notifyIcon.MessageBox("While stopping: " + e.Message + "\n" + e.StackTrace);
-            }            
+            }
             finally
             {
                 _stopping = false;
             }
-            
+
         }
 
         public void Start()
@@ -825,27 +831,11 @@ namespace MiniDeluxe
 
             SetNotifyIconText("MiniDeluxe - Running (0 connections)");
         }
-
-        public void ShowOptionsForm()
-        {
-            MiniDeluxeForm form = new MiniDeluxeForm(this);            
-            form.Show();
-        }
-
+        
         public void EndProgram()
         {
             Stop();
             _notifyIcon.EndProgram();
-        }
-
-        public bool HRDTCPServer_IsListening()
-        {
-            return _server != null && _server.IsListening;
-        }
-
-        public void SetNotifyIconText(String s)
-        {
-            _notifyIcon.SetNotifyText(s);
         }
     }  
 }

@@ -63,6 +63,7 @@
       <DependentUpon>AboutBox.cs</DependentUpon>
     </Compile>
     <Compile Include="CATConnector.cs" />
+    <Compile Include="CheckForUpdate.cs" />
     <Compile Include="HRDTCPServer.cs" />
     <Compile Include="MiniDeluxeForm.cs">
       <SubType>Form</SubType>

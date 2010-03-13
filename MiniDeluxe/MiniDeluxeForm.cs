@@ -67,5 +67,25 @@ namespace MiniDeluxe
             AboutBox a  = new AboutBox();
             a.Show();
         }
+
+        private void btnCheckForUpdate_Click(object sender, EventArgs e)
+        {
+            String updateUrl = CheckForUpdate.CheckForXMLUpdate("http://vhfwiki.com/xml/minideluxe.xml");
+            if(updateUrl.Equals(String.Empty))
+            {            
+                MessageBox.Show("No updates available.");
+                return;
+            }
+
+            const string title = "Update available!";
+            const string question = "Open web browser to download new version?";
+            if (DialogResult.Yes ==
+             MessageBox.Show(this, question, title,
+                             MessageBoxButtons.YesNo,
+                             MessageBoxIcon.Question))
+            {
+                System.Diagnostics.Process.Start(updateUrl);
+            }            
+        }
      }
 }

@@ -221,7 +221,7 @@ namespace MiniDeluxe
                 get { return _smeter; }
                 set
                 {
-                    double i = (double.Parse(value) / 0.5) - 121;
+                    float i = (float.Parse(value) / 2f) - 121f;                    
                     if (i < -121) _smeter = "0";
                     else if (i < -115) _smeter = "1";
                     else if (i < -109) _smeter = "2";
@@ -475,7 +475,7 @@ namespace MiniDeluxe
                 case "ZZMN":
                     ProcessDSPFilters(e.Data);
                     break;
-                case "ZZSM":
+                case "ZZSM":                    
                     _data.Smeter = e.Data.Substring(1);
                     break;
                 case "ZZTX":
@@ -535,7 +535,7 @@ namespace MiniDeluxe
             else if (s.Contains("GET BUTTONS"))
                 bw.Write(HRDMessage.HRDMessageToByteArray(GetButtons()));
             else if (s.Contains("GET SMETER-MAIN"))            
-                bw.Write(HRDMessage.HRDMessageToByteArray(String.Format("S,{0},1.5", _data.Smeter)));            
+                bw.Write(HRDMessage.HRDMessageToByteArray(String.Format("S{0},1,{0}", 14 - int.Parse(_data.Smeter))));            
             else if (s.Contains("GET BUTTON-SELECT TX"))
                 bw.Write(HRDMessage.HRDMessageToByteArray(_data.mox ? "1" : "0"));
             else if (s.Contains("GET DROPDOWNS"))

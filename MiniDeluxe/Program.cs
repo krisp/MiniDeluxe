@@ -27,7 +27,8 @@ namespace MiniDeluxe
         [STAThread]
         static void Main()
         {
-            Console.WriteLine("MiniDeluxe version {0}", System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);            
+            System.Diagnostics.Debug.Listeners.Add(new System.Diagnostics.TextWriterTraceListener(Console.Out));
+            MiniDeluxe.Debug(String.Format("MiniDeluxe version {0}", System.Reflection.Assembly.GetExecutingAssembly().GetName().Version));            
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             new MiniDeluxe();

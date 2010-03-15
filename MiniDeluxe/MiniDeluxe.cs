@@ -30,7 +30,7 @@ namespace MiniDeluxe
         private CATConnector _cat;
         private HRDTCPServer _server;
         private readonly NotifyIcon _notifyIcon;
-        private bool _stopping;
+        private bool _stopping;                
 
         RadioData _data;
         struct RadioData
@@ -414,10 +414,10 @@ namespace MiniDeluxe
             s = s.Remove(s.IndexOf('\0'));
 
 #if DEBUG
-            Console.WriteLine("RX: {0}", s);
+            Debug(String.Format("RX: {0}", s));
 #endif
 
-            if(s.Contains("GET"))            
+            if (s.Contains("GET"))            
                 ProcessHRDTCPGetCommand(s,bw);                                                      
             else if(s.Contains("SET"))            
                 ProcessHRDTCPSetCommand(s,bw);
@@ -546,7 +546,7 @@ namespace MiniDeluxe
 
         void ProcessHRDTCPSetCommand(String s, BinaryWriter bw)
         {            
-            Console.WriteLine("SET COMMAND: {0}", s);
+            Debug(String.Format("SET COMMAND: {0}", s));
 
             if (s.Contains("SET DROPDOWN"))
                 SetDropdown(s);
@@ -836,6 +836,16 @@ namespace MiniDeluxe
         {
             Stop();
             _notifyIcon.EndProgram();
+        }
+
+        public static void StartDebug()
+        {
+            System.Diagnostics.Debug.Listeners.Add(new System.Diagnostics.TextWriterTraceListener("debug.txt"));            
+        }
+
+        public static void Debug(String s)
+        {
+            System.Diagnostics.Debug.WriteLine(s);
         }
     }  
 }

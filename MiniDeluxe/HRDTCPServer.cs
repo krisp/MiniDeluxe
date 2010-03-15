@@ -128,9 +128,8 @@ namespace MiniDeluxe
               };
 
 #if DEBUG
-            Console.WriteLine("TX: {0}", szText);
+            MiniDeluxe.Debug(String.Format("TX: {0}", szText));
 #endif
-
             // Serialize it
             int len = (int)msg.nSize;
             byte[] buf = new byte[len];

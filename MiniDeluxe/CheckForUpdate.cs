@@ -5,6 +5,8 @@ namespace MiniDeluxe
 {
     public static class CheckForUpdate
     {
+        private const String ProgramName = "MiniDeluxe";
+
         public static String CheckForXMLUpdate(String updateXMLURL)
         {
             // this code was borrowed from:
@@ -20,7 +22,7 @@ namespace MiniDeluxe
                 reader.MoveToContent();
                 string elementName = "";
                 if ((reader.NodeType == XmlNodeType.Element) &&
-                    (reader.Name == "MiniDeluxe"))
+                    (reader.Name == ProgramName))
                 {
                     while (reader.Read())
                     {                        
@@ -34,10 +36,6 @@ namespace MiniDeluxe
                                 switch (elementName)
                                 {
                                     case "version":
-                                        // thats why we keep the version info
-                                        // in xxx.xxx.xxx.xxx format
-                                        // the Version class does the
-                                        // parsing for us
                                         newVersion = new Version(reader.Value);
                                         break;
                                     case "url":

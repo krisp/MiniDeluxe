@@ -614,6 +614,9 @@ namespace MiniDeluxe
                     case "DSP~FLTR":
                         output.Append("DSP Fltr:" + _data.DSPFilter + "Hz" + "\u0009");
                         break;
+                    default:
+                        output.Append(m.Groups[1].Value + ": " + "\u0009");
+                        break;
                 }
             }
             
@@ -845,7 +848,11 @@ namespace MiniDeluxe
 
         public static void Debug(String s)
         {
+#if DEBUG
             System.Diagnostics.Debug.WriteLine(s);
+#else
+            Console.WriteLine(s);
+#endif
         }
     }  
 }

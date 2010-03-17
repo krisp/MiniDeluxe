@@ -87,13 +87,5 @@ namespace MiniDeluxe
                 System.Diagnostics.Process.Start(updateUrl);
             }            
         }
-
-#if DEBUG
-        private void btnDebug_Click(object sender, EventArgs e)
-        {
-            MiniDeluxe.StartDebug();
-            btnDebug.Enabled = false;
-        }
-#endif
      }
 }

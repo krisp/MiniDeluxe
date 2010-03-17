@@ -27,6 +27,12 @@ namespace MiniDeluxe
         [STAThread]
         static void Main()
         {
+            System.Diagnostics.Process.GetCurrentProcess().MaxWorkingSet =
+                System.Diagnostics.Process.GetCurrentProcess().MinWorkingSet;
+
+#if DEBUG
+            System.Diagnostics.Debug.Listeners.Add(new System.Diagnostics.TextWriterTraceListener("debug.txt"));            
+#endif
             System.Diagnostics.Debug.Listeners.Add(new System.Diagnostics.TextWriterTraceListener(Console.Out));
             MiniDeluxe.Debug(String.Format("MiniDeluxe version {0}", System.Reflection.Assembly.GetExecutingAssembly().GetName().Version));            
             Application.EnableVisualStyles();

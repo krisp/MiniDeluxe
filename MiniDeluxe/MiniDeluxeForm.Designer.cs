@@ -43,9 +43,6 @@
             this.cbLocalOnly = new System.Windows.Forms.CheckBox();
             this.btnAbout = new System.Windows.Forms.Button();
             this.btnCheckForUpdate = new System.Windows.Forms.Button();
-#if DEBUG
-            this.btnDebug = new System.Windows.Forms.Button();
-#endif
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -181,27 +178,12 @@
             this.btnCheckForUpdate.Text = "Check for Update";
             this.btnCheckForUpdate.UseVisualStyleBackColor = true;
             this.btnCheckForUpdate.Click += new System.EventHandler(this.btnCheckForUpdate_Click);
-#if DEBUG
-            // 
-            // btnDebug
-            // 
-            this.btnDebug.Location = new System.Drawing.Point(172, 160);
-            this.btnDebug.Name = "btnDebug";
-            this.btnDebug.Size = new System.Drawing.Size(64, 23);
-            this.btnDebug.TabIndex = 16;
-            this.btnDebug.Text = "Debug";
-            this.btnDebug.UseVisualStyleBackColor = true;
-            this.btnDebug.Click += new System.EventHandler(this.btnDebug_Click);
-#endif
             // 
             // MiniDeluxeForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(248, 247);
-#if DEBUG
-            this.Controls.Add(this.btnDebug);
-#endif
             this.Controls.Add(this.btnCheckForUpdate);
             this.Controls.Add(this.btnAbout);
             this.Controls.Add(this.cbLocalOnly);
@@ -242,9 +224,6 @@
         private System.Windows.Forms.CheckBox cbLocalOnly;
         private System.Windows.Forms.Button btnAbout;
         private System.Windows.Forms.Button btnCheckForUpdate;
-#if DEBUG
-        private System.Windows.Forms.Button btnDebug;
-#endif
     }
 }
 

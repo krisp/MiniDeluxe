@@ -43,12 +43,8 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-<<<<<<< HEAD
     <DefineConstants>
     </DefineConstants>
-=======
-    <DefineConstants>TRACE</DefineConstants>
->>>>>>> c630fdb4b7f9b06e0dea3e3312d1c405daed55a7
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>

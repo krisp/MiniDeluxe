@@ -16,6 +16,7 @@
 */
 using System;
 using System.Text;
+using System.Collections;
 using System.Text.RegularExpressions;
 using System.IO.Ports;
 using System.Timers;
@@ -47,6 +48,7 @@ namespace MiniDeluxe
             public string vfob;
             public string rawmode;
             public string dspfilters;
+            public ArrayList dspfilterarray;
             public bool mox;            
 
             public string Mode
@@ -92,6 +94,9 @@ namespace MiniDeluxe
                             break;
                         case "11":
                             _mode = "DRM";
+                            break;
+                        case "99":
+                            _mode = "OFF";
                             break;
                         default:
                             _mode = value;
@@ -244,131 +249,13 @@ namespace MiniDeluxe
                 get { return _dspfilter;  }
                 set
                 {
-                    if (_mode.Equals("DSB") || _mode.Equals("USB") || _mode.Contains("DIG"))
+                    try
                     {
-                        switch (value)
-                        {
-                            case "00":
-                                _dspfilter = "5.0K";
-                                break;
-                            case "01":
-                                _dspfilter = "4.4K";
-                                break;
-                            case "02":
-                                _dspfilter = "3.8K";
-                                break;
-                            case "03":
-                                _dspfilter = "3.3K";
-                                break;
-                            case "04":
-                                _dspfilter = "2.9K";
-                                break;
-                            case "05":
-                                _dspfilter = "2.7K";
-                                break;
-                            case "06":
-                                _dspfilter = "2.4K";
-                                break;
-                            case "07":
-                                _dspfilter = "2.1K";
-                                break;
-                            case "08":
-                                _dspfilter = "1.8K";
-                                break;
-                            case "09":
-                                _dspfilter = "1.0K";
-                                break;
-                            case "10":
-                                _dspfilter = "VAR1";
-                                break;
-                            case "11":
-                                _dspfilter = "VAR2";
-                                break;
-                        }
+                        _dspfilter = (String) dspfilterarray[int.Parse(value)];                        
                     }
-                    else if(_mode.Contains("AM") || _mode.Contains("FM") || _mode.Equals("DSB"))
+                    catch (Exception)
                     {
-                        switch (value)
-                        {
-                            case "00":
-                                _dspfilter = "16K";
-                                break;
-                            case "01":
-                                _dspfilter = "12K";
-                                break;
-                            case "02":
-                                _dspfilter = "10K";
-                                break;
-                            case "03":
-                                _dspfilter = "8.0K";
-                                break;
-                            case "04":
-                                _dspfilter = "6.6K";
-                                break;
-                            case "05":
-                                _dspfilter = "5.2K";
-                                break;
-                            case "06":
-                                _dspfilter = "4.0K";
-                                break;
-                            case "07":
-                                _dspfilter = "3.1K";
-                                break;
-                            case "08":
-                                _dspfilter = "2.9K";
-                                break;
-                            case "09":
-                                _dspfilter = "2.4K";
-                                break;
-                            case "10":
-                                _dspfilter = "VAR1";
-                                break;
-                            case "11":
-                                _dspfilter = "VAR2";
-                                break;
-                        }
-                    }
-                    else if(_mode.Contains("CW"))
-                    {
-                        switch (value)
-                        {
-                            case "00":
-                                _dspfilter = "1.0K";
-                                break;
-                            case "01":
-                                _dspfilter = "800";
-                                break;
-                            case "02":
-                                _dspfilter = "750";
-                                break;
-                            case "03":
-                                _dspfilter = "600";
-                                break;
-                            case "04":
-                                _dspfilter = "500";
-                                break;
-                            case "05":
-                                _dspfilter = "400";
-                                break;
-                            case "06":
-                                _dspfilter = "250";
-                                break;
-                            case "07":
-                                _dspfilter = "100";
-                                break;
-                            case "08":
-                                _dspfilter = "50";
-                                break;
-                            case "09":
-                                _dspfilter = "25";
-                                break;
-                            case "10":
-                                _dspfilter = "VAR1";
-                                break;
-                            case "11":
-                                _dspfilter = "VAR2";
-                                break;
-                        }
+                        _dspfilter = "UNKN";
                     }
                 }
             }
@@ -399,6 +286,11 @@ namespace MiniDeluxe
         public MiniDeluxe()
         {
             _notifyIcon = new NotifyIcon(this);
+
+            Timer mmt = new Timer(1000 * 60 * 5);
+            mmt.Elapsed += delegate {System.Diagnostics.Process.GetCurrentProcess().MaxWorkingSet =
+                System.Diagnostics.Process.GetCurrentProcess().MinWorkingSet;};
+            mmt.Start();
 
             if (Properties.Settings.Default.FirstRun)
                 ShowOptionsForm();
@@ -431,6 +323,7 @@ namespace MiniDeluxe
             _cat.WriteCommand("ZZIF;");
             _cat.WriteCommand("ZZFB;");
             _cat.WriteCommand("ZZSM0;");
+            _cat.WriteCommand("ZZFI;");
         }
 
         void TimerLongElapsed(object sender, ElapsedEventArgs e)
@@ -438,7 +331,6 @@ namespace MiniDeluxe
             _cat.WriteCommand("ZZBS;");
             _cat.WriteCommand("ZZDM;");
             _cat.WriteCommand("ZZGT;");  
-            _cat.WriteCommand("ZZFI;");
             _cat.WriteCommand("ZZPA;");
         }   
 
@@ -451,7 +343,10 @@ namespace MiniDeluxe
                     _data.vfoa = e.Data.Substring(0, 11);
                     // has the mode changed? if so, ask for new dsp string.
                     if (!_data.rawmode.Equals(e.Data.Substring(27, 2)))
+                    {
                         _cat.WriteCommand("ZZMN" + e.Data.Substring(27, 2) + ";");
+                        Debug("Asked for filters for mode " + e.Data.Substring(27,2));
+                    }
                     _data.Mode = e.Data.Substring(27, 2);
                     _data.mox = (e.Data.Substring(26, 1).Equals("1")) ? true : false;
                     break;
@@ -507,9 +402,27 @@ namespace MiniDeluxe
             s.Append(filters.Substring(120, 5) + ",");
             s.Append(filters.Substring(135, 5) + ",");
             s.Append(filters.Substring(150, 5) + ",");
-            s.Append(filters.Substring(165, 5));    
-            
-            _data.dspfilters = Regex.Replace(s.ToString(), " ", "");                       
+            s.Append(filters.Substring(165, 5));
+
+            _data.dspfilterarray = new ArrayList
+                                       {
+                                           filters.Substring(0, 5),
+                                           filters.Substring(15, 5),
+                                           filters.Substring(30, 5),
+                                           filters.Substring(45, 5),
+                                           filters.Substring(60, 5),
+                                           filters.Substring(75, 5),
+                                           filters.Substring(90, 5),
+                                           filters.Substring(105, 5),
+                                           filters.Substring(120, 5),
+                                           filters.Substring(135, 5),
+                                           filters.Substring(150, 5),
+                                           filters.Substring(165, 5),
+                                           "UNKN"
+                                       };
+
+            _data.dspfilters = Regex.Replace(s.ToString(), " ", "", RegexOptions.Compiled);   
+            Debug("New DSP Filter String: " + _data.dspfilters);        
         }
 
         void ProcessHRDTCPGetCommand(String s, BinaryWriter bw)
@@ -550,9 +463,9 @@ namespace MiniDeluxe
 
             if (s.Contains("SET DROPDOWN"))
                 SetDropdown(s);
-            else if (s.Contains("SET FREQUENCIES-HZ"))
+            else if (s.Contains("SET FREQUENCIES-"))
             {
-                Match m = Regex.Match(s, "FREQUENCIES-HZ (\\d+) (\\d+)");
+                Match m = Regex.Match(s, "FREQUENCIES- (\\d+) (\\d+)");
                 if (!m.Success) return;
                 String vfoa = String.Format("{0:00000000000}", long.Parse(m.Groups[1].Value));
                 String vfob = String.Format("{0:00000000000}", long.Parse(m.Groups[2].Value));
@@ -563,9 +476,9 @@ namespace MiniDeluxe
             }
             else if (s.Contains("SET BUTTON-SELECT"))
                 _cat.WriteCommand(SetButton(s));
-            else if (s.Contains("SET FREQUENCY-HZ"))
+            else if (s.Contains("SET FREQUENCY-"))
             {
-                Match m = Regex.Match(s, "FREQUENCY-HZ (\\d+)");
+                Match m = Regex.Match(s, "FREQUENCY- (\\d+)");
                 if(!m.Success) return;
                 String vfoa = String.Format("{0:00000000000}", long.Parse(m.Groups[1].Value));
                 _cat.WriteCommand("ZZFA" + vfoa + ";");
@@ -612,7 +525,8 @@ namespace MiniDeluxe
                         output.Append("Preamp: " + _data.Preamp + "\u0009");
                         break;
                     case "DSP~FLTR":
-                        output.Append("DSP Fltr:" + _data.DSPFilter + "Hz" + "\u0009");
+                        Debug("DSP Filter requested, sending: " + _data.DSPFilter);
+                        output.Append("DSP Fltr:" + _data.DSPFilter + "" + "\u0009");
                         break;
                 }
             }
@@ -641,7 +555,7 @@ namespace MiniDeluxe
                     output = "Spectrum,Panadapter,Scope,Phase,Phase2,Waterfall,Histogram,Off";
                     break;
                 case "DSP FLTR":
-                    //replace with DSP list for current mode
+                    Debug("DSP Filter list requested, sending: " + _data.dspfilters);
                     output = _data.dspfilters;
                     break;
                 case "PREAMP":
@@ -657,7 +571,7 @@ namespace MiniDeluxe
 
         void SetDropdown(String s)
         {
-            Match m = Regex.Match(s, "SET DROPDOWN ([\\w~]+) (\\w+) (\\d+)", RegexOptions.Compiled);
+            Match m = Regex.Match(s, "SET DROPDOWN ([\\w~]+) ([\\w.]+) (\\d+)", RegexOptions.Compiled);
             if(!m.Success) return;
 
             switch(m.Groups[1].Value)
@@ -666,11 +580,12 @@ namespace MiniDeluxe
                     String mode = String.Format("{0:00}", int.Parse(m.Groups[3].Value));
                     _cat.WriteCommand("ZZMD" + mode + ";");
                     _cat.WriteCommand("ZZMN" + mode + ";");
-                    _cat.WriteCommand("ZZFI;");
                     _data.Mode = mode;
+                    _cat.WriteCommand("ZZFI;");
                     break;
-                case "DSP~FLTR":
+                case "DSP~FLTR":                    
                     String fltr = String.Format("{0:00}", int.Parse(m.Groups[3].Value));                    
+                    Debug("Setting filter to " + fltr);
                     _cat.WriteCommand("ZZFI" + fltr + ";");
                     _data.DSPFilter = fltr;
                     break;
@@ -789,11 +704,16 @@ namespace MiniDeluxe
                 {
                     vfoa = "0",
                     vfob = "0",
-                    Mode = "00",
+                    Mode = "99",
                     mox = false,
                     DisplayMode = "0",
                     Smeter = "0",
-                    dspfilters = "6.0kHz,4.0kHz,2.6kHz,2.1kHz,1.0kHz,500Hz,250Hz,100Hz,50Hz,25Hz,VAR1,VAR2",
+                    dspfilters = "",
+                    dspfilterarray = new ArrayList
+                                         {
+                                         "6.0","4.0","2.6","2.1","1.0",
+                                         "500","250","100","50","25","VAR1","VAR2","UNKN"
+                                         },
                 };
 
                 _cat = new CATConnector(new SerialPort(Properties.Settings.Default.SerialPort));
@@ -822,8 +742,8 @@ namespace MiniDeluxe
             _cat.WriteCommand("ZZBS;");
             _cat.WriteCommand("ZZDM;");
             _cat.WriteCommand("ZZGT;");
-            _cat.WriteCommand("ZZFI;");
             _cat.WriteCommand("ZZPA;");
+            _cat.WriteCommand("ZZFI;");
 
             _timerShort.Start();
             _timerLong.Start();
@@ -838,14 +758,13 @@ namespace MiniDeluxe
             _notifyIcon.EndProgram();
         }
 
-        public static void StartDebug()
-        {
-            System.Diagnostics.Debug.Listeners.Add(new System.Diagnostics.TextWriterTraceListener("debug.txt"));            
-        }
-
         public static void Debug(String s)
         {
+#if DEBUG
             System.Diagnostics.Debug.WriteLine(s);
+#else
+            Console.WriteLine(s);
+#endif
         }
     }  
 }

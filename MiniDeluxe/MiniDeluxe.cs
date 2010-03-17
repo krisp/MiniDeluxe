@@ -528,6 +528,9 @@ namespace MiniDeluxe
                         Debug("DSP Filter requested, sending: " + _data.DSPFilter);
                         output.Append("DSP Fltr:" + _data.DSPFilter + "" + "\u0009");
                         break;
+                    default:
+                        output.Append(m.Groups[1].Value + ": " + "\u0009");
+                        break;
                 }
             }
             

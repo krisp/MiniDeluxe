@@ -463,9 +463,9 @@ namespace MiniDeluxe
 
             if (s.Contains("SET DROPDOWN"))
                 SetDropdown(s);
-            else if (s.Contains("SET FREQUENCIES-"))
+            else if (s.Contains("SET FREQUENCIES-HZ"))
             {
-                Match m = Regex.Match(s, "FREQUENCIES- (\\d+) (\\d+)");
+                Match m = Regex.Match(s, "FREQUENCIES-HZ (\\d+) (\\d+)");
                 if (!m.Success) return;
                 String vfoa = String.Format("{0:00000000000}", long.Parse(m.Groups[1].Value));
                 String vfob = String.Format("{0:00000000000}", long.Parse(m.Groups[2].Value));
@@ -476,9 +476,9 @@ namespace MiniDeluxe
             }
             else if (s.Contains("SET BUTTON-SELECT"))
                 _cat.WriteCommand(SetButton(s));
-            else if (s.Contains("SET FREQUENCY-"))
+            else if (s.Contains("SET FREQUENCY-HZ"))
             {
-                Match m = Regex.Match(s, "FREQUENCY- (\\d+)");
+                Match m = Regex.Match(s, "FREQUENCY-HZ (\\d+)");
                 if(!m.Success) return;
                 String vfoa = String.Format("{0:00000000000}", long.Parse(m.Groups[1].Value));
                 _cat.WriteCommand("ZZFA" + vfoa + ";");

@@ -342,11 +342,8 @@ namespace MiniDeluxe
                 case "ZZIF":                
                     _data.vfoa = e.Data.Substring(0, 11);
                     // has the mode changed? if so, ask for new dsp string.
-                    if (!_data.rawmode.Equals(e.Data.Substring(27, 2)))
-                    {
-                        _cat.WriteCommand("ZZMN" + e.Data.Substring(27, 2) + ";");
-                        Debug("Asked for filters for mode " + e.Data.Substring(27,2));
-                    }
+                    if (!_data.rawmode.Equals(e.Data.Substring(27, 2)))                    
+                        _cat.WriteCommand("ZZMN" + e.Data.Substring(27, 2) + ";");                    
                     _data.Mode = e.Data.Substring(27, 2);
                     _data.mox = (e.Data.Substring(26, 1).Equals("1")) ? true : false;
                     break;
@@ -422,7 +419,6 @@ namespace MiniDeluxe
                                        };
 
             _data.dspfilters = Regex.Replace(s.ToString(), " ", "", RegexOptions.Compiled);   
-            Debug("New DSP Filter String: " + _data.dspfilters);        
         }
 
         void ProcessHRDTCPGetCommand(String s, BinaryWriter bw)
@@ -525,7 +521,6 @@ namespace MiniDeluxe
                         output.Append("Preamp: " + _data.Preamp + "\u0009");
                         break;
                     case "DSP~FLTR":
-                        Debug("DSP Filter requested, sending: " + _data.DSPFilter);
                         output.Append("DSP Fltr:" + _data.DSPFilter + "" + "\u0009");
                         break;
                     default:
@@ -558,7 +553,6 @@ namespace MiniDeluxe
                     output = "Spectrum,Panadapter,Scope,Phase,Phase2,Waterfall,Histogram,Off";
                     break;
                 case "DSP FLTR":
-                    Debug("DSP Filter list requested, sending: " + _data.dspfilters);
                     output = _data.dspfilters;
                     break;
                 case "PREAMP":
@@ -588,7 +582,6 @@ namespace MiniDeluxe
                     break;
                 case "DSP~FLTR":                    
                     String fltr = String.Format("{0:00}", int.Parse(m.Groups[3].Value));                    
-                    Debug("Setting filter to " + fltr);
                     _cat.WriteCommand("ZZFI" + fltr + ";");
                     _data.DSPFilter = fltr;
                     break;

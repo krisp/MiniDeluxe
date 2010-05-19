@@ -30,7 +30,8 @@ namespace MiniDeluxe
         private CATConnector _cat;
         private HRDTCPServer _server;
         private readonly NotifyIcon _notifyIcon;
-        private bool _stopping;                
+        private bool _stopping;
+        private bool _listenOnly;
 
         RadioData _data;
         struct RadioData
@@ -447,7 +448,7 @@ namespace MiniDeluxe
             switch(e.Command)
             {
                 // vfoa, mode, xmit status
-                case "ZZIF":                
+                case "ZZIF": case "IF":                
                     _data.vfoa = e.Data.Substring(0, 11);
                     // has the mode changed? if so, ask for new dsp string.
                     if (!_data.rawmode.Equals(e.Data.Substring(27, 2)))
@@ -802,6 +803,7 @@ namespace MiniDeluxe
                 _cat = new CATConnector(new SerialPort(Properties.Settings.Default.SerialPort));
                 _timerShort = new Timer(Properties.Settings.Default.HighInterval);
                 _timerLong = new Timer(Properties.Settings.Default.LowInterval);
+                _listenOnly = Properties.Settings.Default.ListenOnly;
                 _server = new HRDTCPServer(this);
 
             }
@@ -819,17 +821,22 @@ namespace MiniDeluxe
             _timerLong.Elapsed += TimerLongElapsed;
             _server.HRDTCPEvent += ServerHRDTCPEvent;
 
-            // write initial commands to the radio to fill in initial data
-            _cat.WriteCommand("ZZIF;");
-            _cat.WriteCommand("ZZFB;");
-            _cat.WriteCommand("ZZBS;");
-            _cat.WriteCommand("ZZDM;");
-            _cat.WriteCommand("ZZGT;");
-            _cat.WriteCommand("ZZFI;");
-            _cat.WriteCommand("ZZPA;");
+            // Start the timers only if polling is enabled
+            if (!_listenOnly)
+            {
+                // write initial commands to the radio to fill in initial data
+                _cat.WriteCommand("ZZIF;");
+                _cat.WriteCommand("ZZFB;");
+                _cat.WriteCommand("ZZBS;");
+                _cat.WriteCommand("ZZDM;");
+                _cat.WriteCommand("ZZGT;");
+                _cat.WriteCommand("ZZFI;");
+                _cat.WriteCommand("ZZPA;");
 
-            _timerShort.Start();
-            _timerLong.Start();
+                _timerShort.Start();
+                _timerLong.Start();
+            }
+            
             _server.Start();
 
             SetNotifyIconText("MiniDeluxe - Running (0 connections)");

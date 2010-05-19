@@ -43,9 +43,7 @@
             this.cbLocalOnly = new System.Windows.Forms.CheckBox();
             this.btnAbout = new System.Windows.Forms.Button();
             this.btnCheckForUpdate = new System.Windows.Forms.Button();
-#if DEBUG
-            this.btnDebug = new System.Windows.Forms.Button();
-#endif
+            this.cbListenOnly = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -106,7 +104,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(33, 25);
+            this.label3.Location = new System.Drawing.Point(21, 25);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(66, 13);
             this.label3.TabIndex = 7;
@@ -115,7 +113,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(33, 52);
+            this.label4.Location = new System.Drawing.Point(23, 52);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(64, 13);
             this.label4.TabIndex = 8;
@@ -123,6 +121,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.cbListenOnly);
             this.groupBox1.Controls.Add(this.tbLow);
             this.groupBox1.Controls.Add(this.tbHigh);
             this.groupBox1.Controls.Add(this.label3);
@@ -136,7 +135,7 @@
             // 
             // tbLow
             // 
-            this.tbLow.Location = new System.Drawing.Point(166, 49);
+            this.tbLow.Location = new System.Drawing.Point(93, 49);
             this.tbLow.Name = "tbLow";
             this.tbLow.Size = new System.Drawing.Size(51, 20);
             this.tbLow.TabIndex = 10;
@@ -144,7 +143,7 @@
             // 
             // tbHigh
             // 
-            this.tbHigh.Location = new System.Drawing.Point(166, 22);
+            this.tbHigh.Location = new System.Drawing.Point(93, 22);
             this.tbHigh.Name = "tbHigh";
             this.tbHigh.Size = new System.Drawing.Size(51, 20);
             this.tbHigh.TabIndex = 9;
@@ -181,27 +180,22 @@
             this.btnCheckForUpdate.Text = "Check for Update";
             this.btnCheckForUpdate.UseVisualStyleBackColor = true;
             this.btnCheckForUpdate.Click += new System.EventHandler(this.btnCheckForUpdate_Click);
-#if DEBUG
             // 
-            // btnDebug
+            // cbListenOnly
             // 
-            this.btnDebug.Location = new System.Drawing.Point(172, 160);
-            this.btnDebug.Name = "btnDebug";
-            this.btnDebug.Size = new System.Drawing.Size(64, 23);
-            this.btnDebug.TabIndex = 16;
-            this.btnDebug.Text = "Debug";
-            this.btnDebug.UseVisualStyleBackColor = true;
-            this.btnDebug.Click += new System.EventHandler(this.btnDebug_Click);
-#endif
+            this.cbListenOnly.AutoSize = true;
+            this.cbListenOnly.Location = new System.Drawing.Point(150, 19);
+            this.cbListenOnly.Name = "cbListenOnly";
+            this.cbListenOnly.Size = new System.Drawing.Size(81, 30);
+            this.cbListenOnly.TabIndex = 11;
+            this.cbListenOnly.Text = "Listen Only \r\n(no polling)";
+            this.cbListenOnly.UseVisualStyleBackColor = true;
             // 
             // MiniDeluxeForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(248, 247);
-#if DEBUG
-            this.Controls.Add(this.btnDebug);
-#endif
             this.Controls.Add(this.btnCheckForUpdate);
             this.Controls.Add(this.btnAbout);
             this.Controls.Add(this.cbLocalOnly);
@@ -242,6 +236,7 @@
         private System.Windows.Forms.CheckBox cbLocalOnly;
         private System.Windows.Forms.Button btnAbout;
         private System.Windows.Forms.Button btnCheckForUpdate;
+        private System.Windows.Forms.CheckBox cbListenOnly;
 #if DEBUG
         private System.Windows.Forms.Button btnDebug;
 #endif

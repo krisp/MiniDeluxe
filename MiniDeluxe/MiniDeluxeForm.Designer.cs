@@ -120,7 +120,6 @@
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.cbListenOnly);
             this.groupBox1.Controls.Add(this.tbLow);
             this.groupBox1.Controls.Add(this.tbHigh);
             this.groupBox1.Controls.Add(this.label3);

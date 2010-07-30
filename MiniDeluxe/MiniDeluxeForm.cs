@@ -16,6 +16,13 @@ namespace MiniDeluxe
 
         private void MiniDeluxeForm_Load(object sender, EventArgs e)
         {
+            ToolTip t = new ToolTip();
+            t.AutoPopDelay = 10000;
+            t.InitialDelay = 1000;
+            t.ReshowDelay = 500;
+
+            t.SetToolTip(cbListenOnly, "For use with DDUtil 'Repeater' serial port from DDUtil's 'Other' tab. Does not poll PowerSDR for any data and instead uses data repeated by DDUtil. Check this box only if connecting to DDUtil's 'Repeater Port'");
+
             lblStatus.Text = _parent.HRDTCPServer_IsListening() ? "Server enabled." : "Server disabled.";
 
             foreach (String port in SerialPort.GetPortNames())
@@ -35,7 +42,6 @@ namespace MiniDeluxe
             tbHigh.Text = Properties.Settings.Default.HighInterval.ToString();
             tbLow.Text = Properties.Settings.Default.LowInterval.ToString();
             cbLocalOnly.Checked = Properties.Settings.Default.LocalOnly;
-
         }
 
         private void btnSave_Click(object sender, EventArgs e)
@@ -63,7 +69,8 @@ namespace MiniDeluxe
                 Properties.Settings.Default.HighInterval = double.Parse(tbHigh.Text);
                 Properties.Settings.Default.LowInterval = double.Parse(tbLow.Text);
                 Properties.Settings.Default.FirstRun = false;
-                Properties.Settings.Default.LocalOnly = cbLocalOnly.Checked;                
+                Properties.Settings.Default.LocalOnly = cbLocalOnly.Checked;
+                Properties.Settings.Default.ListenOnly = cbListenOnly.Checked;
                 Properties.Settings.Default.Save();
             }
             catch (Exception e)

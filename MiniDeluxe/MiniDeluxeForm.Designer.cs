@@ -103,7 +103,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(33, 25);
+            this.label3.Location = new System.Drawing.Point(21, 25);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(66, 13);
             this.label3.TabIndex = 7;
@@ -112,7 +112,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(33, 52);
+            this.label4.Location = new System.Drawing.Point(23, 52);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(64, 13);
             this.label4.TabIndex = 8;
@@ -120,6 +120,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.cbListenOnly);
             this.groupBox1.Controls.Add(this.tbLow);
             this.groupBox1.Controls.Add(this.tbHigh);
             this.groupBox1.Controls.Add(this.label3);
@@ -133,7 +134,7 @@
             // 
             // tbLow
             // 
-            this.tbLow.Location = new System.Drawing.Point(166, 49);
+            this.tbLow.Location = new System.Drawing.Point(93, 49);
             this.tbLow.Name = "tbLow";
             this.tbLow.Size = new System.Drawing.Size(51, 20);
             this.tbLow.TabIndex = 10;
@@ -141,7 +142,7 @@
             // 
             // tbHigh
             // 
-            this.tbHigh.Location = new System.Drawing.Point(166, 22);
+            this.tbHigh.Location = new System.Drawing.Point(93, 22);
             this.tbHigh.Name = "tbHigh";
             this.tbHigh.Size = new System.Drawing.Size(51, 20);
             this.tbHigh.TabIndex = 9;
@@ -224,6 +225,7 @@
         private System.Windows.Forms.CheckBox cbLocalOnly;
         private System.Windows.Forms.Button btnAbout;
         private System.Windows.Forms.Button btnCheckForUpdate;
+        private System.Windows.Forms.CheckBox cbListenOnly;
     }
 }
 

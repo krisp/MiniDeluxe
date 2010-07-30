@@ -444,7 +444,7 @@ namespace MiniDeluxe
             else if (s.Contains("GET BUTTONS"))
                 bw.Write(HRDMessage.HRDMessageToByteArray(GetButtons()));
             else if (s.Contains("GET SMETER-MAIN"))            
-                bw.Write(HRDMessage.HRDMessageToByteArray(String.Format("S{0},1,{0}", 14 - int.Parse(_data.Smeter))));            
+                bw.Write(HRDMessage.HRDMessageToByteArray(String.Format("S{0},{0},1.5", 14 - int.Parse(_data.Smeter))));            
             else if (s.Contains("GET BUTTON-SELECT TX"))
                 bw.Write(HRDMessage.HRDMessageToByteArray(_data.mox ? "1" : "0"));
             else if (s.Contains("GET DROPDOWNS"))
@@ -638,8 +638,16 @@ namespace MiniDeluxe
 
         public void ShowOptionsForm()
         {
-            MiniDeluxeForm form = new MiniDeluxeForm(this);            
-            form.Show();
+            try
+            {
+                MiniDeluxeForm form = new MiniDeluxeForm(this);
+                form.Show();
+            }
+            catch (Exception e)
+            {
+                Debug(e.Message);
+                Debug(e.StackTrace);
+            }
         }
 
         public bool HRDTCPServer_IsListening()
@@ -756,11 +764,8 @@ namespace MiniDeluxe
 
         public static void Debug(String s)
         {
-#if DEBUG
             System.Diagnostics.Debug.WriteLine(s);
-#else
-            Console.WriteLine(s);
-#endif
+            System.Diagnostics.Debug.Flush();
         }
     }  
 }

@@ -46,10 +46,17 @@ namespace MiniDeluxe
 
         public void Start()
         {
-            _listener.Start();
-            IsListening = true;
-            Thread listenerThread = new Thread(ListenerThread);
-            listenerThread.Start();
+            try
+            {
+                _listener.Start();
+                IsListening = true;
+                Thread listenerThread = new Thread(ListenerThread);
+                listenerThread.Start();
+            }
+            catch (SocketException se)
+            {
+                IsListening = false;
+            }
         }
 
         private void ListenerThread()

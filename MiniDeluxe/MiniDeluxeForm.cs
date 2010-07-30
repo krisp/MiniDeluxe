@@ -21,11 +21,21 @@ namespace MiniDeluxe
             foreach (String port in SerialPort.GetPortNames())
                 cbSerialport.Items.Add(port);
 
-            cbSerialport.SelectedIndex = Properties.Settings.Default.SerialPortIdx;
+            try
+            {
+                if(Properties.Settings.Default.SerialPortIdx != 0)
+                    cbSerialport.SelectedIndex = Properties.Settings.Default.SerialPortIdx;
+            }
+            catch (Exception)
+            {
+
+            }
+
             tbPort.Text = Properties.Settings.Default.Port.ToString();
             tbHigh.Text = Properties.Settings.Default.HighInterval.ToString();
             tbLow.Text = Properties.Settings.Default.LowInterval.ToString();
             cbLocalOnly.Checked = Properties.Settings.Default.LocalOnly;
+
         }
 
         private void btnSave_Click(object sender, EventArgs e)
@@ -64,6 +74,7 @@ namespace MiniDeluxe
 
         private void btnAbout_Click(object sender, EventArgs e)
         {
+            //throw new Exception("AboutBoxException");
             AboutBox a  = new AboutBox();
             a.Show();
         }

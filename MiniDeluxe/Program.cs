@@ -15,6 +15,8 @@
    MiniDeluxe is Copyright (C) 2010 by K1FSY
 */
 using System;
+using System.Diagnostics;
+using System.IO;
 using System.Windows.Forms;
 
 namespace MiniDeluxe
@@ -27,18 +29,30 @@ namespace MiniDeluxe
         [STAThread]
         static void Main()
         {
-            System.Diagnostics.Process.GetCurrentProcess().MaxWorkingSet =
-                System.Diagnostics.Process.GetCurrentProcess().MinWorkingSet;
+            try
+            {
+
+                Process.GetCurrentProcess().MaxWorkingSet =
+                    Process.GetCurrentProcess().MinWorkingSet;
 
 #if DEBUG
-            System.Diagnostics.Debug.Listeners.Add(new System.Diagnostics.TextWriterTraceListener("debug.txt"));            
+                var filename = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),"minideluxe.debug.txt");
+                Debug.Listeners.Add(new TextWriterTraceListener(filename));
 #endif
-            System.Diagnostics.Debug.Listeners.Add(new System.Diagnostics.TextWriterTraceListener(Console.Out));
-            MiniDeluxe.Debug(String.Format("MiniDeluxe version {0}", System.Reflection.Assembly.GetExecutingAssembly().GetName().Version));            
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            new MiniDeluxe();
-            Application.Run();
+                Debug.Listeners.Add(new TextWriterTraceListener(Console.Out));
+                Debug.WriteLine(String.Format("MiniDeluxe version {0}",
+                                               System.Reflection.Assembly.GetExecutingAssembly().GetName().Version));
+                Debug.Flush();
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                new MiniDeluxe();
+                Application.Run();
+            }
+            catch(Exception ex)
+            {
+                Debug.WriteLine(String.Format("Exception: {0}\n\nStack: {1}", ex.Message, ex.StackTrace));
+                Debug.Flush();
+            }
         }
     }
 }

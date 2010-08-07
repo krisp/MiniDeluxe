@@ -653,7 +653,11 @@ namespace MiniDeluxe
 
         public bool HRDTCPServer_IsListening()
         {
-            return _server != null && _server.IsListening;
+            if(_server != null)
+            {
+                return _server.IsListening;
+            }
+            return false;
         }
 
         public void SetNotifyIconText(String s)

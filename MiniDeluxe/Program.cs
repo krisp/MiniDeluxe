@@ -32,8 +32,9 @@ namespace MiniDeluxe
             try
             {
 
-                Process.GetCurrentProcess().MaxWorkingSet =
-                    Process.GetCurrentProcess().MinWorkingSet;
+              // Commented out as it appears to be causing problems for Windows XP users
+              //  Process.GetCurrentProcess().MaxWorkingSet =
+              //      Process.GetCurrentProcess().MinWorkingSet;
 
 #if DEBUG
                 var filename = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),"minideluxe.debug.txt");

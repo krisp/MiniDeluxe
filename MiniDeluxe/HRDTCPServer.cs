@@ -53,7 +53,7 @@ namespace MiniDeluxe
                 Thread listenerThread = new Thread(ListenerThread);
                 listenerThread.Start();
             }
-            catch (SocketException se)
+            catch (SocketException)
             {
                 IsListening = false;
             }

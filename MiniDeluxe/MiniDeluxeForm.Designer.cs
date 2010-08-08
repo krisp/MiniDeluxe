@@ -224,7 +224,6 @@
         private System.Windows.Forms.CheckBox cbLocalOnly;
         private System.Windows.Forms.Button btnAbout;
         private System.Windows.Forms.Button btnCheckForUpdate;
-        private System.Windows.Forms.CheckBox cbListenOnly;
     }
 }
 

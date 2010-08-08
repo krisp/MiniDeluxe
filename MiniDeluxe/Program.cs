@@ -38,10 +38,10 @@ namespace MiniDeluxe
 
 #if DEBUG
                 var filename = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),"minideluxe.debug.txt");
-                Debug.Listeners.Add(new TextWriterTraceListener(filename));
+                Debug.Listeners.Add(new TextWriterTraceListener(filename));          
 #endif
                 Debug.Listeners.Add(new TextWriterTraceListener(Console.Out));
-                Debug.WriteLine(String.Format("MiniDeluxe version {0}",
+                Console.WriteLine(String.Format("MiniDeluxe version {0}",
                                                System.Reflection.Assembly.GetExecutingAssembly().GetName().Version));
                 Debug.Flush();
                 Application.EnableVisualStyles();

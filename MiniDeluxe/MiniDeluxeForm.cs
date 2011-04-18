@@ -7,6 +7,7 @@ namespace MiniDeluxe
     public partial class MiniDeluxeForm : Form
     {
         private readonly MiniDeluxe _parent;
+        private RIOX.RIOXClient _c;
 
         public MiniDeluxeForm(MiniDeluxe parent)
         {
@@ -102,5 +103,35 @@ namespace MiniDeluxe
                 System.Diagnostics.Process.Start(updateUrl);
             }            
         }
+
+        private void btnRIOXTest_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                DDUtilState.RadioData r = new DDUtilState.RadioData();
+                _c = new RIOX.RIOXClient(r.GetType(), txtRIOXIP.Text, int.Parse(txtRIOXport.Text));
+                _c.ObjectReceivedEvent += new RIOX.RIOXClient.ObjectReceivedEventHandler(c_ObjectReceivedEvent);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Failure: " + ex.Message);
+            }
+        }
+
+        void c_ObjectReceivedEvent(object o, RIOX.RIOXClient.ObjectReceivedEventArgs e)
+        {
+            DDUtilState.RadioData r = (DDUtilState.RadioData)e.DataObject;
+            MessageBox.Show("Success: Received Frequency: " + r.vfoa);
+            _c.Close();
+        }
+
+        private void btnBrowseDLL_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                txtDLLPath.Text = ofd.FileName; 
+            }            
+        }           
      }
 }

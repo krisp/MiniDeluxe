@@ -32,6 +32,7 @@ namespace MiniDeluxe
         private bool _stopListening;
         private bool _stopClients;
         private int _connectionCount;
+        public int ConnectionCount { get { return _connectionCount; } }
         private readonly MiniDeluxe _parent;
 
         private readonly TcpListener _listener;
@@ -135,7 +136,7 @@ namespace MiniDeluxe
               };
 
 #if DEBUG
-            MiniDeluxe.Debug(String.Format("TX: {0}", szText));
+            //MiniDeluxe.Debug(String.Format("TX: {0}", szText));
 #endif
             // Serialize it
             int len = (int)msg.nSize;

@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("MiniDeluxe")]
 [assembly: AssemblyDescription("Light-weight replacement for Ham Radio Deluxe, allowing interoperability between PowerSDR and Ham Radio Deluxe's suite of programs.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("http://vhfwiki.com/minideluxe")]
+[assembly: AssemblyCompany("K1FSY")]
 [assembly: AssemblyProduct("MiniDeluxe")]
 [assembly: AssemblyCopyright("Copyright © K1FSY")]
 [assembly: AssemblyTrademark("")]

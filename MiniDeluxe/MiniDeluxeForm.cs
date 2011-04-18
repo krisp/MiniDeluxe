@@ -29,7 +29,7 @@ namespace MiniDeluxe
 
             try
             {
-                if(Properties.Settings.Default.SerialPortIdx != 0)
+                //if(Properties.Settings.Default.SerialPortIdx != 0)
                     cbSerialport.SelectedIndex = Properties.Settings.Default.SerialPortIdx;
             }
             catch (Exception)
@@ -41,6 +41,8 @@ namespace MiniDeluxe
             tbHigh.Text = Properties.Settings.Default.HighInterval.ToString();
             tbLow.Text = Properties.Settings.Default.LowInterval.ToString();
             cbLocalOnly.Checked = Properties.Settings.Default.LocalOnly;
+            txtRIOXIP.Text = Properties.Settings.Default.RIOXIP;
+            txtRIOXport.Text = Properties.Settings.Default.RIOXPort.ToString();
         }
 
         private void btnSave_Click(object sender, EventArgs e)
@@ -68,7 +70,9 @@ namespace MiniDeluxe
                 Properties.Settings.Default.HighInterval = double.Parse(tbHigh.Text);
                 Properties.Settings.Default.LowInterval = double.Parse(tbLow.Text);
                 Properties.Settings.Default.FirstRun = false;
-                Properties.Settings.Default.LocalOnly = cbLocalOnly.Checked;                
+                Properties.Settings.Default.LocalOnly = cbLocalOnly.Checked;
+                Properties.Settings.Default.RIOXIP = txtRIOXIP.Text;
+                Properties.Settings.Default.RIOXPort = int.Parse(txtRIOXport.Text);
                 Properties.Settings.Default.Save();
             }
             catch (Exception e)
@@ -124,14 +128,5 @@ namespace MiniDeluxe
             MessageBox.Show("Success: Received Frequency: " + r.vfoa);
             _c.Close();
         }
-
-        private void btnBrowseDLL_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog ofd = new OpenFileDialog();
-            if (ofd.ShowDialog() == DialogResult.OK)
-            {
-                txtDLLPath.Text = ofd.FileName; 
-            }            
-        }           
      }
 }

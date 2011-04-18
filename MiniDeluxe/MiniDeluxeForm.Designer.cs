@@ -46,9 +46,6 @@
             this.label1 = new System.Windows.Forms.Label();
             this.cbSerialport = new System.Windows.Forms.ComboBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.btnBrowseDLL = new System.Windows.Forms.Button();
-            this.txtDLLPath = new System.Windows.Forms.TextBox();
-            this.label7 = new System.Windows.Forms.Label();
             this.btnRIOXTest = new System.Windows.Forms.Button();
             this.txtRIOXport = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
@@ -222,9 +219,6 @@
             // 
             // tabPage2
             // 
-            this.tabPage2.Controls.Add(this.btnBrowseDLL);
-            this.tabPage2.Controls.Add(this.txtDLLPath);
-            this.tabPage2.Controls.Add(this.label7);
             this.tabPage2.Controls.Add(this.btnRIOXTest);
             this.tabPage2.Controls.Add(this.txtRIOXport);
             this.tabPage2.Controls.Add(this.label6);
@@ -238,35 +232,9 @@
             this.tabPage2.Text = "RIOX/DDUtil";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // btnBrowseDLL
-            // 
-            this.btnBrowseDLL.Location = new System.Drawing.Point(203, 58);
-            this.btnBrowseDLL.Name = "btnBrowseDLL";
-            this.btnBrowseDLL.Size = new System.Drawing.Size(22, 23);
-            this.btnBrowseDLL.TabIndex = 7;
-            this.btnBrowseDLL.Text = "...";
-            this.btnBrowseDLL.UseVisualStyleBackColor = true;
-            this.btnBrowseDLL.Click += new System.EventHandler(this.btnBrowseDLL_Click);
-            // 
-            // txtDLLPath
-            // 
-            this.txtDLLPath.Location = new System.Drawing.Point(97, 60);
-            this.txtDLLPath.Name = "txtDLLPath";
-            this.txtDLLPath.Size = new System.Drawing.Size(100, 20);
-            this.txtDLLPath.TabIndex = 6;
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(22, 63);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(67, 13);
-            this.label7.TabIndex = 5;
-            this.label7.Text = "Path to DLL:";
-            // 
             // btnRIOXTest
             // 
-            this.btnRIOXTest.Location = new System.Drawing.Point(9, 96);
+            this.btnRIOXTest.Location = new System.Drawing.Point(122, 69);
             this.btnRIOXTest.Name = "btnRIOXTest";
             this.btnRIOXTest.Size = new System.Drawing.Size(75, 23);
             this.btnRIOXTest.TabIndex = 4;
@@ -362,9 +330,6 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.TextBox txtRIOXIP;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Button btnBrowseDLL;
-        private System.Windows.Forms.TextBox txtDLLPath;
-        private System.Windows.Forms.Label label7;
     }
 }
 

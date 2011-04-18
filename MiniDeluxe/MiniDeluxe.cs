@@ -29,10 +29,12 @@ namespace MiniDeluxe
         private Timer _timerShort;
         private Timer _timerLong;
         private CATConnector _cat;
+        private RIOX.RIOXClient _riox;
         private HRDTCPServer _server;
         private readonly NotifyIcon _notifyIcon;
         private bool _stopping;
         private bool _listenOnly;
+        private bool _usingRIOX;
 
         RadioData _data;
         struct RadioData
@@ -307,7 +309,7 @@ namespace MiniDeluxe
             s = s.Remove(s.IndexOf('\0'));
 
 #if DEBUG
-            Debug(String.Format("RX: {0}", s));
+            //Debug(String.Format("RX: {0}", s));
 #endif
 
             if (s.Contains("GET"))            
@@ -329,10 +331,21 @@ namespace MiniDeluxe
 
         void TimerLongElapsed(object sender, ElapsedEventArgs e)
         {
-            _cat.WriteCommand("ZZBS;");
-            _cat.WriteCommand("ZZDM;");
-            _cat.WriteCommand("ZZGT;");  
-            _cat.WriteCommand("ZZPA;");
+            if (!_usingRIOX)
+            {
+                _cat.WriteCommand("ZZBS;");
+                _cat.WriteCommand("ZZDM;");
+                _cat.WriteCommand("ZZGT;");
+                _cat.WriteCommand("ZZPA;");
+                return;
+            }
+
+            // RIOX connection check
+            if (_riox.IsConnected == false)
+            {
+                SetNotifyIconText("MiniDeluxe - RIOX Disconnected (" + _server.ConnectionCount + " connections)");
+                _riox.Connect();
+            }            
         }   
 
         void CatcatEvent(object sender, CATEventArgs e)
@@ -344,7 +357,7 @@ namespace MiniDeluxe
                     _data.vfoa = e.Data.Substring(0, 11);
                     // has the mode changed? if so, ask for new dsp string.
                     if (!_data.rawmode.Equals(e.Data.Substring(27, 2)))                    
-                        _cat.WriteCommand("ZZMN" + e.Data.Substring(27, 2) + ";");                    
+                        WriteCommand("ZZMN" + e.Data.Substring(27, 2) + "");                    
                     _data.Mode = e.Data.Substring(27, 2);
                     _data.mox = (e.Data.Substring(26, 1).Equals("1")) ? true : false;
                     break;
@@ -466,19 +479,19 @@ namespace MiniDeluxe
                 if (!m.Success) return;
                 String vfoa = String.Format("{0:00000000000}", long.Parse(m.Groups[1].Value));
                 String vfob = String.Format("{0:00000000000}", long.Parse(m.Groups[2].Value));
-                _cat.WriteCommand("ZZFA" + vfoa + ";");
-                _cat.WriteCommand("ZZFB" + vfob + ";");
+                WriteCommand("ZZFA" + vfoa + ";");
+                WriteCommand("ZZFB" + vfob + ";");
                 _data.vfoa = vfoa;
                 _data.vfob = vfob;
             }
             else if (s.Contains("SET BUTTON-SELECT"))
-                _cat.WriteCommand(SetButton(s));
+                SetButton(s);
             else if (s.Contains("SET FREQUENCY-HZ"))
             {
                 Match m = Regex.Match(s, "FREQUENCY-HZ (\\d+)");
                 if(!m.Success) return;
                 String vfoa = String.Format("{0:00000000000}", long.Parse(m.Groups[1].Value));
-                _cat.WriteCommand("ZZFA" + vfoa + ";");
+                WriteCommand("ZZFA" + vfoa + ";");
                 _data.vfoa = vfoa;
             }
             // tell the program that the command executed OK, regardless if it did or not.
@@ -576,46 +589,46 @@ namespace MiniDeluxe
             {
                 case "MODE":
                     String mode = String.Format("{0:00}", int.Parse(m.Groups[3].Value));
-                    _cat.WriteCommand("ZZMD" + mode + ";");
-                    _cat.WriteCommand("ZZMN" + mode + ";");
+                    WriteCommand("ZZMD" + mode + ";");
+                    WriteCommand("ZZMN" + mode + ";");
                     _data.Mode = mode;
-                    _cat.WriteCommand("ZZFI;");
+                    if(!_usingRIOX) WriteCommand("ZZFI;");
                     break;
                 case "DSP~FLTR":                    
                     String fltr = String.Format("{0:00}", int.Parse(m.Groups[3].Value));                    
-                    _cat.WriteCommand("ZZFI" + fltr + ";");
+                    WriteCommand("ZZFI" + fltr + ";");
                     _data.DSPFilter = fltr;
                     break;
                 case "AGC":
-                    _cat.WriteCommand("ZZGT" + m.Groups[3].Value + ";");
+                    WriteCommand("ZZGT" + m.Groups[3].Value + ";");
                     _data.AGC = m.Groups[3].Value;
                     break;
                 case "BAND":
                     String band = Regex.Replace(m.Groups[2].Value, "M", "");                    
                     if (band.Equals("GEN"))
                     {
-                        _cat.WriteCommand("ZZBS888;");
+                        WriteCommand("ZZBS888;");
                         _data.Band = "888";
                         break;
                     }
                     if (band.Equals("WWV"))
                     {
-                        _cat.WriteCommand("ZZBS999;");
+                        WriteCommand("ZZBS999;");
                         _data.Band = "999";
                         break;
                     }
                     if(band.Contains("V")) return; // not implementing vhf band switching yet
                     
                     String output = String.Format("{0:000}", int.Parse(band));
-                    _cat.WriteCommand("ZZBS" + output + ";");
+                    WriteCommand("ZZBS" + output + ";");
                     _data.Band = output;
                     break;
                 case "DISPLAY":
-                    _cat.WriteCommand("ZZDM" + m.Groups[3].Value + ";");
+                    WriteCommand("ZZDM" + m.Groups[3].Value + ";");
                     _data.DisplayMode = m.Groups[3].Value;
                     break;
                 case "PREAMP":
-                    _cat.WriteCommand("ZZPA" + m.Groups[3].Value + ";");
+                    WriteCommand("ZZPA" + m.Groups[3].Value + ";");
                     _data.Preamp = m.Groups[3].Value;
                     break;
             }
@@ -628,10 +641,10 @@ namespace MiniDeluxe
 
             switch(m.Groups[1].Value)
             {
-                case "TX":
-                    String str = String.Format("ZZTX{0};", _data.mox ? "0" : "1");                                      
+                case "TX":                                                     
+                    WriteCommand("ZZTX" + (_data.mox ? "0" : "1") + ";");
                     _data.mox = _data.mox ? false : true;
-                    return str;
+                    break;                    
             }
 
             return "OK";
@@ -685,8 +698,7 @@ namespace MiniDeluxe
                 if (_timerLong != null) _timerLong.Stop();
                 if (_cat != null) _cat.Close();
                 if (_server != null) _server.Close();
-
-
+                if (_riox != null) _riox.Close();
 
                 _cat = null;
                 _server = null;
@@ -725,47 +737,74 @@ namespace MiniDeluxe
                                          },
                 };
 
-                _cat = new CATConnector(new SerialPort(Properties.Settings.Default.SerialPort));
-                _timerShort = new Timer(Properties.Settings.Default.HighInterval);
+                if (Properties.Settings.Default.SerialPortIdx == 0)
+                {
+                    // RIOX
+                    _riox = new RIOX.RIOXClient(typeof(DDUtilState.RadioData), Properties.Settings.Default.RIOXIP, Properties.Settings.Default.RIOXPort);
+                    _riox.ObjectReceivedEvent += new RIOX.RIOXClient.ObjectReceivedEventHandler(_riox_ObjectReceivedEvent);
+                    _usingRIOX = true;
+                }
+                else
+                {
+                    _cat = new CATConnector(new SerialPort(Properties.Settings.Default.SerialPort));
+                    _timerShort = new Timer(Properties.Settings.Default.HighInterval);                    
+                    _cat.CATEvent += CatcatEvent;
+                    _timerShort.Elapsed += TimerShortElapsed;                    
+                }
+
                 _timerLong = new Timer(Properties.Settings.Default.LowInterval);
-                _listenOnly = Properties.Settings.Default.ListenOnly;
+                _timerLong.Elapsed += TimerLongElapsed;
+
+                //_listenOnly = Properties.Settings.Default.ListenOnly;
                 _server = new HRDTCPServer(this);
 
             }
             catch (Exception e)
             {
                 _notifyIcon.MessageBox("While starting: " + e.Message + "\n" +
-                                       "Server is disabled. Please check configuration.");
+                                       "Server is disabled. Please check configuration.\nIf using RIOX mode, please make sure DDUtil is running.");
                 ShowOptionsForm();
                 return;
             }
 
-            // event handlers
-            _cat.CATEvent += CatcatEvent;
-            _timerShort.Elapsed += TimerShortElapsed;
-            _timerLong.Elapsed += TimerLongElapsed;
             _server.HRDTCPEvent += ServerHRDTCPEvent;
 
-            // Start the timers only if polling is enabled
-            if (!_listenOnly)
+            // Start the timers only if serial polling is enabled
+            if (!_usingRIOX)
             {
                 // write initial commands to the radio to fill in initial data
-                _cat.WriteCommand("ZZIF;");
-                _cat.WriteCommand("ZZFB;");
-                _cat.WriteCommand("ZZBS;");
-                _cat.WriteCommand("ZZDM;");
-                _cat.WriteCommand("ZZGT;");
-           // _cat.WriteCommand("ZZFI;");
-                _cat.WriteCommand("ZZPA;");
-            _cat.WriteCommand("ZZFI;");
+                WriteCommand("ZZIF;");
+                WriteCommand("ZZFB;");
+                WriteCommand("ZZBS;");
+                WriteCommand("ZZDM;");
+                WriteCommand("ZZGT;");
+           // WriteCommand("ZZFI;");
+                WriteCommand("ZZPA;");
+                WriteCommand("ZZFI;");
 
                 _timerShort.Start();
                 _timerLong.Start();
             }
-            
+
+            _timerLong.Start();
             _server.Start();
 
             SetNotifyIconText("MiniDeluxe - Running (0 connections)");
+        }
+
+        void _riox_ObjectReceivedEvent(object o, RIOX.RIOXClient.ObjectReceivedEventArgs e)
+        {
+            DDUtilState.RadioData rd = (DDUtilState.RadioData)e.DataObject;
+            _data.AGC = rd.agc;
+            _data.Band = rd.bandr1;
+            _data.DisplayMode = rd.dispmode;
+            _data.DSPFilter = rd.fltr1;
+            _data.Mode = rd.moder1;
+            _data.Smeter = rd.smtr;
+            _data.vfoa = rd.vfoa;
+            _data.vfob = rd.vfob;
+            _data.mox = rd.mox;
+            // _data.Preamp = rd.preamp;
         }
         
         public void EndProgram()
@@ -778,6 +817,36 @@ namespace MiniDeluxe
         {
             System.Diagnostics.Debug.WriteLine(s);
             System.Diagnostics.Debug.Flush();
+        }
+
+        private void WriteCommand(String data)
+        {
+            if (_usingRIOX)
+            {
+                Debug("Writting RIOX command: " + data);
+                try
+                {
+                    _riox.SendCommand(new RIOX.RIOXCommand("ClientCmd", data));
+                }
+                catch (Exception)
+                {
+                    // try reconnecting
+                    try
+                    {
+                        _riox.Close();
+                        _riox.Connect();
+                    }
+                    catch (Exception)
+                    {
+                        // could not reconnect
+                    }
+                }
+            }
+            else
+            {
+                Debug("Writting CAT command: " + data);
+                _cat.WriteCommand(data);
+            }
         }
     }  
 }

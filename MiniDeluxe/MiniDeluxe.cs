@@ -78,7 +78,7 @@ namespace MiniDeluxe
                             _mode = "CWU";
                             break;
                         case "05":
-                            _mode = "FMN";
+                            _mode = "FM";
                             break;
                         case "06":
                             _mode = "AM";
@@ -479,8 +479,10 @@ namespace MiniDeluxe
                 if (!m.Success) return;
                 String vfoa = String.Format("{0:00000000000}", long.Parse(m.Groups[1].Value));
                 String vfob = String.Format("{0:00000000000}", long.Parse(m.Groups[2].Value));
-                WriteCommand("ZZFA" + vfoa + ";");
-                WriteCommand("ZZFB" + vfob + ";");
+                if (vfoa != "00000000000")
+			WriteCommand("ZZFA" + vfoa + ";");
+        	if (vfob != "00000000000")
+			WriteCommand("ZZFB" + vfob + ";");
                 _data.vfoa = vfoa;
                 _data.vfob = vfob;
             }
@@ -491,7 +493,8 @@ namespace MiniDeluxe
                 Match m = Regex.Match(s, "FREQUENCY-HZ (\\d+)");
                 if(!m.Success) return;
                 String vfoa = String.Format("{0:00000000000}", long.Parse(m.Groups[1].Value));
-                WriteCommand("ZZFA" + vfoa + ";");
+		if (vfoa != "00000000000")
+	                WriteCommand("ZZFA" + vfoa + ";");
                 _data.vfoa = vfoa;
             }
             // tell the program that the command executed OK, regardless if it did or not.
@@ -555,7 +558,7 @@ namespace MiniDeluxe
             switch (q)
             {
                 case "MODE":
-                    output = "LSB,USB,DSB,CWL,CWU,FMN,AM,DIGU,SPEC,DIGL,SAM,DRM";
+                    output = "LSB,USB,DSB,CWL,CWU,FM,AM,DIGU,SPEC,DIGL,SAM,DRM";
                     break;
                 case "AGC":
                     output = "Fixed,Long,Slow,Med,Fast";

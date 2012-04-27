@@ -463,6 +463,8 @@ namespace MiniDeluxe
                 bw.Write(HRDMessage.HRDMessageToByteArray(_data.mox ? "1" : "0"));
             else if (s.Contains("GET DROPDOWNS"))
                 bw.Write(HRDMessage.HRDMessageToByteArray(GetDropdowns()));
+            else if (s.Contains("GET VFO-COUNT"))
+                bw.Write(HRDMessage.HRDMessageToByteArray("2"));
             else
                 bw.Write(HRDMessage.HRDMessageToByteArray("0"));            
         }

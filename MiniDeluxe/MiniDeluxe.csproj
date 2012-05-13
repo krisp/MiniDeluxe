@@ -55,12 +55,13 @@
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Mic-20.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup />
   <ItemGroup>
-    <Reference Include="DDUtilState">
-      <HintPath>.\DDUtilState.dll</HintPath>
-    </Reference>
     <Reference Include="RIOX">
-      <HintPath>.\RIOX.dll</HintPath>
+      <HintPath>..\..\RIOX\RIOX\bin\Release\RIOX.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />

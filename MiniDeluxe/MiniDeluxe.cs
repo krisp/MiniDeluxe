@@ -21,6 +21,7 @@ using System.Text.RegularExpressions;
 using System.IO.Ports;
 using System.Timers;
 using System.IO;
+using RIOX;
 
 namespace MiniDeluxe
 {
@@ -33,7 +34,7 @@ namespace MiniDeluxe
         private HRDTCPServer _server;
         private readonly NotifyIcon _notifyIcon;
         private bool _stopping;
-        private bool _listenOnly;
+        //private bool _listenOnly;
         private bool _usingRIOX;
 
         RadioData _data;
@@ -290,11 +291,6 @@ namespace MiniDeluxe
         {
             _notifyIcon = new NotifyIcon(this);
 
-            Timer mmt = new Timer(1000 * 60 * 5);
-            mmt.Elapsed += delegate {System.Diagnostics.Process.GetCurrentProcess().MaxWorkingSet =
-                System.Diagnostics.Process.GetCurrentProcess().MinWorkingSet;};
-            mmt.Start();
-
             if (Properties.Settings.Default.FirstRun)
                 ShowOptionsForm();
             else
@@ -324,6 +320,7 @@ namespace MiniDeluxe
         void TimerShortElapsed(object sender, ElapsedEventArgs e)
         {
             _cat.WriteCommand("ZZIF;");
+            _cat.WriteCommand("ZZFA;");
             _cat.WriteCommand("ZZFB;");
             _cat.WriteCommand("ZZSM0;");
             _cat.WriteCommand("ZZFI;");
@@ -345,7 +342,10 @@ namespace MiniDeluxe
             {
                 SetNotifyIconText("MiniDeluxe - RIOX Disconnected (" + _server.ConnectionCount + " connections)");
                 _riox.Connect();
-            }            
+            }
+
+            _riox.SendCommand(new RIOXCommand("Sub", "ZZIF;ZZFA;ZZFB;ZZBS;ZZDM;ZZGT;ZZPA;ZZFI;"));
+             
         }   
 
         void CatcatEvent(object sender, CATEventArgs e)
@@ -354,12 +354,16 @@ namespace MiniDeluxe
             {
                 // vfoa, mode, xmit status
                 case "ZZIF": case "IF":                
-                    _data.vfoa = e.Data.Substring(0, 11);
+                    if(!_usingRIOX) // may be an issue with ddutil and zzif; will investigate
+                        _data.vfoa = e.Data.Substring(0, 11); 
                     // has the mode changed? if so, ask for new dsp string.
                     if (!_data.rawmode.Equals(e.Data.Substring(27, 2)))                    
                         WriteCommand("ZZMN" + e.Data.Substring(27, 2) + "");                    
                     _data.Mode = e.Data.Substring(27, 2);
                     _data.mox = (e.Data.Substring(26, 1).Equals("1")) ? true : false;
+                    break;
+                case "ZZFA":
+                    _data.vfoa = e.Data;
                     break;
                 // vfob
                 case "ZZFB":
@@ -703,7 +707,12 @@ namespace MiniDeluxe
                 if (_timerLong != null) _timerLong.Stop();
                 if (_cat != null) _cat.Close();
                 if (_server != null) _server.Close();
-                if (_riox != null) _riox.Close();
+                if (_riox != null)
+                {
+                    if (_riox.IsConnected) _riox.SendCommand(new RIOXCommand("UnSub", "NONE"));
+                    _riox.Close();
+                }
+                
 
                 _cat = null;
                 _server = null;
@@ -745,9 +754,18 @@ namespace MiniDeluxe
                 if (Properties.Settings.Default.SerialPortIdx == 0)
                 {
                     // RIOX
-                    _riox = new RIOX.RIOXClient(typeof(DDUtilState.RadioData), Properties.Settings.Default.RIOXIP, Properties.Settings.Default.RIOXPort);
-                    _riox.ObjectReceivedEvent += new RIOX.RIOXClient.ObjectReceivedEventHandler(_riox_ObjectReceivedEvent);
-                    _usingRIOX = true;
+                    try
+                    {
+                        Console.WriteLine("RIOX initializing");
+                        _riox = new RIOX.RIOXClient(typeof(RIOXData), Properties.Settings.Default.RIOXIP, Properties.Settings.Default.RIOXPort);
+                        _riox.ObjectReceivedEvent += new RIOX.RIOXClient.ObjectReceivedEventHandler(_riox_ObjectReceivedEvent);
+                        _usingRIOX = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        _notifyIcon.MessageBox("RIOX error: " + ex.Message + "\r\n" + ex.StackTrace);
+                        throw ex;
+                    }
                 }
                 else
                 {
@@ -779,16 +797,23 @@ namespace MiniDeluxe
             {
                 // write initial commands to the radio to fill in initial data
                 WriteCommand("ZZIF;");
+                WriteCommand("ZZFA;");
                 WriteCommand("ZZFB;");
                 WriteCommand("ZZBS;");
                 WriteCommand("ZZDM;");
-                WriteCommand("ZZGT;");
-           // WriteCommand("ZZFI;");
+                WriteCommand("ZZGT;");              
                 WriteCommand("ZZPA;");
                 WriteCommand("ZZFI;");
 
                 _timerShort.Start();
-                _timerLong.Start();
+                //_timerLong.Start();
+            }
+            else // using RIOX
+            {
+                // subscribe to what we want from DDUtil
+                _riox.SendCommand(new RIOXCommand("UpDateType", "PSH:500"));
+                //_riox.SendCommand(new RIOXCommand("UnSub", "NONE"));
+                _riox.SendCommand(new RIOXCommand("Sub","ZZIF;ZZFA;ZZFB;ZZBS;ZZDM;ZZGT;ZZPA;ZZFI;"));               
             }
 
             _timerLong.Start();
@@ -799,17 +824,17 @@ namespace MiniDeluxe
 
         void _riox_ObjectReceivedEvent(object o, RIOX.RIOXClient.ObjectReceivedEventArgs e)
         {
-            DDUtilState.RadioData rd = (DDUtilState.RadioData)e.DataObject;
-            _data.AGC = rd.agc;
-            _data.Band = rd.bandr1;
-            _data.DisplayMode = rd.dispmode;
-            _data.DSPFilter = rd.fltr1;
-            _data.Mode = rd.moder1;
-            _data.Smeter = rd.smtr;
-            _data.vfoa = rd.vfoa;
-            _data.vfob = rd.vfob;
-            _data.mox = rd.mox;
-            // _data.Preamp = rd.preamp;
+            RIOXData rd = (RIOXData)e.DataObject;
+            Console.WriteLine("ObjectReceived " + rd.Count);
+            
+            // pass it through the CAT event parser since DDUtil passes them as command/data key/pair
+            foreach(DictionaryEntry de in rd)
+            {
+                CATEventArgs c = new CATEventArgs((string)de.Key, (string)de.Value);
+                Console.WriteLine("Key: {0} Val: {1}", de.Key, de.Value);
+                CatcatEvent(this, c);
+            }
+            
         }
         
         public void EndProgram()

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 using System.IO.Ports;
+using System.Collections;
 
 namespace MiniDeluxe
 {
@@ -55,7 +56,7 @@ namespace MiniDeluxe
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Unable to save: " + ex.Message);
+                MessageBox.Show("Unable to save: " + ex.Message + "\r\n" + ex.StackTrace);
                 Close();
             }
         }
@@ -112,9 +113,12 @@ namespace MiniDeluxe
         {
             try
             {
-                DDUtilState.RadioData r = new DDUtilState.RadioData();
+                //DDUtilState.RadioData r = new DDUtilState.RadioData();
+                RIOX.RIOXData r = new RIOX.RIOXData();                
                 _c = new RIOX.RIOXClient(r.GetType(), txtRIOXIP.Text, int.Parse(txtRIOXport.Text));
-                _c.ObjectReceivedEvent += new RIOX.RIOXClient.ObjectReceivedEventHandler(c_ObjectReceivedEvent);
+                _c.SendCommand(new RIOX.RIOXCommand("UpDateType", "PSH:500"));
+                _c.SendCommand(new RIOX.RIOXCommand("Sub", "ZZFA;"));
+                _c.ObjectReceivedEvent += new RIOX.RIOXClient.ObjectReceivedEventHandler(c_ObjectReceivedEvent);                
             }
             catch (Exception ex)
             {
@@ -124,8 +128,14 @@ namespace MiniDeluxe
 
         void c_ObjectReceivedEvent(object o, RIOX.RIOXClient.ObjectReceivedEventArgs e)
         {
-            DDUtilState.RadioData r = (DDUtilState.RadioData)e.DataObject;
-            MessageBox.Show("Success: Received Frequency: " + r.vfoa);
+            //DDUtilState.RadioData r = (DDUtilState.RadioData)e.DataObject;
+            RIOX.RIOXData r = (RIOX.RIOXData)e.DataObject;
+            Console.WriteLine("R: " + r.ToString());
+            foreach (DictionaryEntry de in r)
+            {
+                Console.WriteLine("Key: {0} Value {1}", de.Key, de.Value);
+            }
+            MessageBox.Show("Success: Received Frequency: " + r["ZZFA"]);
             _c.Close();
         }
      }

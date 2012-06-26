@@ -444,11 +444,11 @@ namespace MiniDeluxe
             if (s.Contains("GET ID"))            
                 bw.Write(HRDMessage.HRDMessageToByteArray("Ham Radio Deluxe"));            
             else if (s.Contains("GET VERSION"))            
-                bw.Write(HRDMessage.HRDMessageToByteArray("v0.1"));            
+                bw.Write(HRDMessage.HRDMessageToByteArray("v5.23")); // W0DHB fix for v5.23
             else if (s.Contains("GET FREQUENCY"))            
                 bw.Write(HRDMessage.HRDMessageToByteArray(_data.vfoa));            
-            else if (s.Contains("GET RADIO"))         
-                bw.Write(HRDMessage.HRDMessageToByteArray("PowerSDR"));            
+            else if (s.Contains("GET RADIO"))
+                bw.Write(HRDMessage.HRDMessageToByteArray("11:PowerSDR")); // W0DHB fix for v5.23
             else if (s.Contains("GET CONTEXT"))            
                 bw.Write(HRDMessage.HRDMessageToByteArray("1"));           
             else if (s.Contains("GET FREQUENCIES"))            

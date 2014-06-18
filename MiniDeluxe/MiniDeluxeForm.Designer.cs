@@ -100,6 +100,7 @@
             // 
             // btnCheckForUpdate
             // 
+            this.btnCheckForUpdate.Enabled = false;
             this.btnCheckForUpdate.Location = new System.Drawing.Point(123, 218);
             this.btnCheckForUpdate.Name = "btnCheckForUpdate";
             this.btnCheckForUpdate.Size = new System.Drawing.Size(113, 23);

@@ -61,7 +61,7 @@
   <PropertyGroup />
   <ItemGroup>
     <Reference Include="RIOX">
-      <HintPath>..\..\RIOX\RIOX\bin\Release\RIOX.dll</HintPath>
+      <HintPath>..\..\RIOX\RIOX\bin\Debug\RIOX.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />

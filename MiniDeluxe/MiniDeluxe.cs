@@ -448,7 +448,17 @@ namespace MiniDeluxe
             else if (s.Contains("GET FREQUENCY"))            
                 bw.Write(HRDMessage.HRDMessageToByteArray(_data.vfoa));            
             else if (s.Contains("GET RADIO"))
-                bw.Write(HRDMessage.HRDMessageToByteArray("11:PowerSDR")); // W0DHB fix for v5.23
+            {
+
+                if (s.Contains("GET RADIOS"))
+                {
+                    bw.Write(HRDMessage.HRDMessageToByteArray("3:PowerSDR SmartSDR"));
+                }
+                else
+                {
+                    bw.Write(HRDMessage.HRDMessageToByteArray("PowerSDR SmartSDR"));
+                }
+            }
             else if (s.Contains("GET CONTEXT"))            
                 bw.Write(HRDMessage.HRDMessageToByteArray("1"));           
             else if (s.Contains("GET FREQUENCIES"))            

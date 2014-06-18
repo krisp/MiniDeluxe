@@ -91,6 +91,7 @@ namespace MiniDeluxe
 
         private void btnCheckForUpdate_Click(object sender, EventArgs e)
         {
+            /* disabled for now
             String updateUrl = CheckForUpdate.CheckForXMLUpdate("http://vhfwiki.com/xml/minideluxe.xml");
             if(updateUrl.Equals(String.Empty))
             {            
@@ -107,6 +108,7 @@ namespace MiniDeluxe
             {
                 System.Diagnostics.Process.Start(updateUrl);
             }            
+            */
         }
 
         private void btnRIOXTest_Click(object sender, EventArgs e)

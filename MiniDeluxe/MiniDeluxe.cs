@@ -1,4 +1,4 @@
-﻿/* This file is part of MiniDeluxe.
+/* This file is part of MiniDeluxe.
    MiniDeluxe is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
@@ -586,7 +586,16 @@ namespace MiniDeluxe
                     output = "Spectrum,Panadapter,Scope,Phase,Phase2,Waterfall,Histogram,Off";
                     break;
                 case "DSP FLTR":
-                    output = _data.dspfilters;
+                    // we need set these based on mode...
+                    switch (_data.Mode)
+                    {
+                        default:
+                        case "USB":
+                        case "LSB":
+                            output = "6.0kHz,2.6 kHz,2.1kHz,1.0kHz,500Hz,250Hz,100Hz";
+                            break;
+                    }
+                   
                     break;
                 case "PREAMP":
                     output = "Off,Low,Medium,High";
@@ -612,6 +621,7 @@ namespace MiniDeluxe
                     WriteCommand("ZZMN" + mode + ";");
                     _data.Mode = mode;
                     if(!_usingRIOX) WriteCommand("ZZFI;");
+                //    WriteCommand("ZZMN");
                     break;
                 case "DSP~FLTR":                    
                     String fltr = String.Format("{0:00}", int.Parse(m.Groups[3].Value));                    
@@ -646,6 +656,8 @@ namespace MiniDeluxe
                     WriteCommand("ZZDM" + m.Groups[3].Value + ";");
                     _data.DisplayMode = m.Groups[3].Value;
                     break;
+
+                     
                 case "PREAMP":
                     WriteCommand("ZZPA" + m.Groups[3].Value + ";");
                     _data.Preamp = m.Groups[3].Value;
@@ -663,7 +675,13 @@ namespace MiniDeluxe
                 case "TX":                                                     
                     WriteCommand("ZZTX" + (_data.mox ? "0" : "1") + ";");
                     _data.mox = _data.mox ? false : true;
+                    break;
+                case "split":
+                case "Split":
+                    WriteCommand("ZZSP" + (_data.mox ? "0" : "1") + ";");
+                    _data.mox = _data.mox ? false : true;
                     break;                    
+
             }
 
             return "OK";

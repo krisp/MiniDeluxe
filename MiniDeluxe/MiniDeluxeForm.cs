@@ -2,6 +2,8 @@
 using System.Windows.Forms;
 using System.IO.Ports;
 using System.Collections;
+using RIOX;
+
 
 namespace MiniDeluxe
 {
@@ -44,6 +46,7 @@ namespace MiniDeluxe
             cbLocalOnly.Checked = Properties.Settings.Default.LocalOnly;
             txtRIOXIP.Text = Properties.Settings.Default.RIOXIP;
             txtRIOXport.Text = Properties.Settings.Default.RIOXPort.ToString();
+            cbSSDR.Checked = Properties.Settings.Default.SSDR;  
         }
 
         private void btnSave_Click(object sender, EventArgs e)
@@ -72,6 +75,7 @@ namespace MiniDeluxe
                 Properties.Settings.Default.LowInterval = double.Parse(tbLow.Text);
                 Properties.Settings.Default.FirstRun = false;
                 Properties.Settings.Default.LocalOnly = cbLocalOnly.Checked;
+                Properties.Settings.Default.SSDR = cbSSDR.Checked;
                 Properties.Settings.Default.RIOXIP = txtRIOXIP.Text;
                 Properties.Settings.Default.RIOXPort = int.Parse(txtRIOXport.Text);
                 Properties.Settings.Default.Save();
@@ -139,6 +143,11 @@ namespace MiniDeluxe
             }
             MessageBox.Show("Success: Received Frequency: " + r["ZZFA"]);
             _c.Close();
+        }
+
+        private void cbSSDR_CheckedChanged(object sender, EventArgs e)
+        {
+
         }
      }
 }

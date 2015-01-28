@@ -51,6 +51,7 @@
             this.label6 = new System.Windows.Forms.Label();
             this.txtRIOXIP = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
+            this.cbSSDR = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -277,11 +278,23 @@
             this.label5.TabIndex = 0;
             this.label5.Text = "RIOX Server IP:";
             // 
+            // cbSSDR
+            // 
+            this.cbSSDR.AutoSize = true;
+            this.cbSSDR.Location = new System.Drawing.Point(142, 158);
+            this.cbSSDR.Name = "cbSSDR";
+            this.cbSSDR.Size = new System.Drawing.Size(76, 17);
+            this.cbSSDR.TabIndex = 16;
+            this.cbSSDR.Text = "SmartSDR";
+            this.cbSSDR.UseVisualStyleBackColor = true;
+            this.cbSSDR.CheckedChanged += new System.EventHandler(this.cbSSDR_CheckedChanged);
+            // 
             // MiniDeluxeForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(248, 247);
+            this.Controls.Add(this.cbSSDR);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.btnCheckForUpdate);
             this.Controls.Add(this.btnAbout);
@@ -331,6 +344,7 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.TextBox txtRIOXIP;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.CheckBox cbSSDR;
     }
 }
 

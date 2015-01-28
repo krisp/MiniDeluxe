@@ -452,11 +452,25 @@ namespace MiniDeluxe
 
                 if (s.Contains("GET RADIOS"))
                 {
-                    bw.Write(HRDMessage.HRDMessageToByteArray("3:PowerSDR SmartSDR"));
+                    if (Properties.Settings.Default.SSDR)
+                    {
+                        bw.Write(HRDMessage.HRDMessageToByteArray("9:SMART SDR"));
+                    }
+                    else
+                    {
+                        bw.Write(HRDMessage.HRDMessageToByteArray("11:PowerSDR"));
+                    }
                 }
                 else
                 {
-                    bw.Write(HRDMessage.HRDMessageToByteArray("PowerSDR SmartSDR"));
+                    if (Properties.Settings.Default.SSDR)
+                    {
+                        bw.Write(HRDMessage.HRDMessageToByteArray("SMART SDR"));
+                    }
+                    else
+                    {
+                        bw.Write(HRDMessage.HRDMessageToByteArray("PowerSDR"));
+                    }
                 }
             }
             else if (s.Contains("GET CONTEXT"))            
